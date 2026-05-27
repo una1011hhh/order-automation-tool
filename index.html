@@ -1643,23 +1643,31 @@ SN：SN202605270018
     }
 
     function valueByLabels(text, labels) {
-      const labelPattern = labels.map(escapeRegExp).join("|");
-      const pattern = new RegExp(`(?:^|\\n)\\s*(?:${labelPattern})\\s*[:#：-]?\\s*([^\\n]+)`, "i");
+      const labelPattern = labels
+        .slice()
+        .sort((a, b) => b.length - a.length)
+        .map(escapeRegExp)
+        .join("|");
+      const pattern = new RegExp(`(?:^|\\n)[^\\S\\n]*(?:${labelPattern})[^\\S\\n]*(?:[:#：-][^\\S\\n]*)?([^\\n]*)`, "i");
       const match = text.match(pattern);
       return match && match[1] ? match[1].replace(/[，,。；;]+$/g, "").trim() : "";
     }
 
     function multilineValueByLabels(text, labels) {
-      const labelPattern = labels.map(escapeRegExp).join("|");
+      const labelPattern = labels
+        .slice()
+        .sort((a, b) => b.length - a.length)
+        .map(escapeRegExp)
+        .join("|");
       const boundaryLabels = [
         "姓名", "联系人", "收件人", "电话", "手机", "邮箱", "电子邮箱", "国家",
         "国家/地区", "省", "省份", "城市", "市", "地址", "收货地址", "邮编",
         "邮政编码", "SN", "机器SN", "设备SN", "序列号", "产品型号", "型号",
         "产品名称", "订单号", "原订单号", "建单需求", "单据类型", "质保状态",
         "保修状态", "购买渠道", "发票号"
-      ].map(escapeRegExp).join("|");
+      ].sort((a, b) => b.length - a.length).map(escapeRegExp).join("|");
       const pattern = new RegExp(
-        `(?:^|\\n)\\s*(?:${labelPattern})\\s*[:#：-]?\\s*([\\s\\S]*?)(?=\\n\\s*(?:${boundaryLabels})\\s*[:#：-]|$)`,
+        `(?:^|\\n)[^\\S\\n]*(?:${labelPattern})[^\\S\\n]*(?:[:#：-][^\\S\\n]*)?([\\s\\S]*?)(?=\\n[^\\S\\n]*(?:${boundaryLabels})[^\\S\\n]*(?:[:#：-]|$)|$)`,
         "i"
       );
       const match = text.match(pattern);
@@ -1712,12 +1720,44 @@ SN：SN202605270018
       return "";
     }
 
+    function clearExtractableFields() {
+      [
+        "contactName",
+        "phone",
+        "email",
+        "customer",
+        "country",
+        "state",
+        "city",
+        "address",
+        "postalCode",
+        "productCategory",
+        "productModel",
+        "productName",
+        "machineSn",
+        "orderNo",
+        "feedback",
+        "problemDescription",
+        "warrantyStatus",
+        "orderType"
+      ].forEach((id) => {
+        if (fields[id]) {
+          fields[id].value = "";
+        }
+      });
+      populateProductModelOptions("");
+      syncCategoryChecks();
+      productMapHint.textContent = "选择产品型号后会自动带出产品类别和产品名称。";
+    }
+
     function extractInfoFromText() {
       const text = normalizeSourceText(rawInput.value);
       if (!text) {
         showToast("请先粘贴客户原始内容。");
         return;
       }
+
+      clearExtractableFields();
 
       const extracted = {
         contactName: valueByLabels(text, ["联系人", "姓名", "客户姓名", "收件人", "Name", "Contact", "Receiver"]) || firstMatch(text, [
