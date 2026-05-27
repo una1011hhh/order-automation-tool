@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>售后物流建单助手</title>
+  <style>
+    :root {
+      --bg: #eef1f5;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d9dee7;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --danger: #dc2626;
+      --danger-bg: #fff1f2;
+      --success: #0f766e;
+      --success-bg: #ecfdf5;
+      --warning: #b45309;
+      --warning-bg: #fffbeb;
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 1180px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #f7f8fb 0%, var(--bg) 100%);
+    }
+
+    .app-shell {
+      width: 1180px;
+      margin: 0 auto;
+      padding: 24px 0 44px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 26px;
+      margin-bottom: 18px;
+      background: #172033;
+      border-radius: 18px;
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .topbar p {
+      margin: 0;
+      color: #c7d2fe;
+      font-size: 14px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .status-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 16px;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: 0 5px 16px rgba(15, 23, 42, 0.05);
+    }
+
+    .status-banner strong {
+      font-size: 15px;
+    }
+
+    .status-banner.complete {
+      border-color: rgba(15, 118, 110, 0.32);
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .status-banner.incomplete {
+      border-color: rgba(220, 38, 38, 0.28);
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .status-banner .hint {
+      color: inherit;
+      opacity: 0.78;
+      font-size: 13px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(217, 222, 231, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+    }
+
+    .card-header span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 14px;
+    }
+
+    .field {
+      position: relative;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      color: #374151;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .required-mark {
+      color: var(--danger);
+      margin-left: 2px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease,
+        background-color 0.18s ease;
+    }
+
+    input,
+    select {
+      height: 38px;
+      padding: 8px 10px;
+    }
+
+    textarea {
+      min-height: 94px;
+      padding: 10px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(37, 99, 235, 0.72);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .is-invalid {
+      border-color: var(--danger) !important;
+      background: var(--danger-bg);
+    }
+
+    .field-error {
+      display: none;
+      margin-top: 5px;
+      color: var(--danger);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .field-error.show {
+      display: block;
+    }
+
+    .side-column {
+      display: grid;
+      gap: 18px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .ai-textarea {
+      min-height: 250px;
+    }
+
+    .output-textarea {
+      min-height: 280px;
+      background: #f8fafc;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease,
+        background-color 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--primary);
+      border: 1px solid rgba(37, 99, 235, 0.32);
+    }
+
+    .notice-list {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .notice-list li {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--warning-bg);
+      color: var(--warning);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .notice-list li.error {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 20;
+      max-width: 380px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: #111827;
+      color: #fff;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.22);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      font-size: 14px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .footer-note {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 1200px) {
+      body {
+        min-width: 0;
+      }
+
+      .app-shell {
+        width: auto;
+        padding: 16px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-column {
+        position: static;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar,
+      .status-banner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .main-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>售后物流建单助手</h1>
+        <p>用于维修、退货、换机、补发等场景，减少重复录入并降低漏填风险。</p>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="btn-ghost" id="loadMockBtn">载入 Mock 数据</button>
+        <button type="button" class="btn-ghost" id="clearBtn">清空表单</button>
+      </div>
+    </header>
+
+    <section id="statusBanner" class="status-banner incomplete" aria-live="polite">
+      <strong id="statusText">仍有 0 个必填项未完成</strong>
+      <span class="hint">带 <span class="required-mark">*</span> 的字段为必填；红框表示需要补充或格式错误。</span>
+    </section>
+
+    <div class="layout">
+      <main class="main-grid">
+        <section class="card">
+          <div class="card-header">
+            <h2>一、客户信息</h2>
+            <span>收件与联系人基础资料</span>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="field">
+                <label for="contactName">联系人姓名 <span class="required-mark">*</span></label>
+                <input id="contactName" data-required="true" data-label="联系人姓名" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="phone">联系电话 <span class="required-mark">*</span></label>
+                <input id="phone" data-required="true" data-label="联系电话" type="tel" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="email">电子邮箱 <span class="required-mark">*</span></label>
+                <input id="email" data-required="true" data-label="电子邮箱" type="email" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="customer">客户 <span class="required-mark">*</span></label>
+                <input id="customer" data-required="true" data-label="客户" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="country">国家/地区 <span class="required-mark">*</span></label>
+                <input id="country" data-required="true" data-label="国家/地区" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="state">州/省</label>
+                <input id="state" data-label="州/省" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="city">城市 <span class="required-mark">*</span></label>
+                <input id="city" data-required="true" data-label="城市" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="postalCode">邮政编码 <span class="required-mark">*</span></label>
+                <input id="postalCode" data-required="true" data-label="邮政编码" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field full">
+                <label for="address">详细地址 <span class="required-mark">*</span></label>
+                <textarea id="address" data-required="true" data-label="详细地址"></textarea>
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="repairSite">寄修网点 <span class="required-mark">*</span></label>
+                <input id="repairSite" data-required="true" data-label="寄修网点" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="supportAgent">客服</label>
+                <input id="supportAgent" data-label="客服" type="text" />
+                <div class="field-error"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>二、产品信息</h2>
+            <span>设备、订单与反馈内容</span>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="field">
+                <label for="productCategory">产品类别 <span class="required-mark">*</span></label>
+                <input id="productCategory" data-required="true" data-label="产品类别" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="productModel">产品型号 <span class="required-mark">*</span></label>
+                <input id="productModel" data-required="true" data-label="产品型号" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="productName">产品名称 <span class="required-mark">*</span></label>
+                <input id="productName" data-required="true" data-label="产品名称" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="machineSn">车牌号（机器SN） <span class="required-mark">*</span></label>
+                <input id="machineSn" data-required="true" data-label="车牌号（机器SN）" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="deviceArchive">设备档案</label>
+                <input id="deviceArchive" data-label="设备档案" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="purchaseChannel">购买渠道</label>
+                <input id="purchaseChannel" data-label="购买渠道" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="purchaseDate">购买日期</label>
+                <input id="purchaseDate" data-label="购买日期" type="date" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="invoiceNo">发票号</label>
+                <input id="invoiceNo" data-label="发票号" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="orderNo">订单号</label>
+                <input id="orderNo" data-label="订单号" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="issueCategory">问题分类</label>
+                <input id="issueCategory" data-label="问题分类" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="warrantyStatus">质保状态 <span class="required-mark">*</span></label>
+                <select id="warrantyStatus" data-required="true" data-label="质保状态">
+                  <option value="">请选择</option>
+                  <option value="保内">保内</option>
+                  <option value="保外">保外</option>
+                </select>
+                <div class="field-error"></div>
+              </div>
+              <div class="field full">
+                <label for="feedback">反馈内容 <span class="required-mark">*</span></label>
+                <textarea id="feedback" data-required="true" data-label="反馈内容"></textarea>
+                <div class="field-error"></div>
+              </div>
+              <div class="field full">
+                <label for="remarks">备注</label>
+                <textarea id="remarks" data-label="备注"></textarea>
+                <div class="field-error"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>三、售后信息</h2>
+            <span>建单类型与处理原因</span>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="field">
+                <label for="orderType">建单需求 <span class="required-mark">*</span></label>
+                <select id="orderType" data-required="true" data-label="建单需求">
+                  <option value="">请选择</option>
+                  <option value="发货单">发货单</option>
+                  <option value="维修单">维修单</option>
+                  <option value="退件单">退件单</option>
+                  <option value="换机单">换机单</option>
+                </select>
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="productSku">产品 SKU</label>
+                <input id="productSku" data-label="产品 SKU" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="returnSku">退回产品 SKU</label>
+                <input id="returnSku" data-label="退回产品 SKU" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="reshipSku">补发 SKU</label>
+                <input id="reshipSku" data-label="补发 SKU" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="quantity">数量</label>
+                <input id="quantity" data-label="数量" min="1" type="number" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="feeNotified">是否告知手续费</label>
+                <select id="feeNotified" data-label="是否告知手续费">
+                  <option value="">请选择</option>
+                  <option value="是">是</option>
+                  <option value="否">否</option>
+                </select>
+                <div class="field-error"></div>
+              </div>
+              <div class="field full">
+                <label for="problemDescription">故障/问题描述</label>
+                <textarea id="problemDescription" data-label="故障/问题描述"></textarea>
+                <div class="field-error"></div>
+              </div>
+              <div class="field full">
+                <label for="serviceReason">退件/补发/发货原因</label>
+                <textarea id="serviceReason" data-label="退件/补发/发货原因"></textarea>
+                <div class="field-error"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>四、发货信息</h2>
+            <span>配送方式与签收状态</span>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="field">
+                <label for="shippingMethod">发货方式 <span class="required-mark">*</span></label>
+                <select id="shippingMethod" data-required="true" data-label="发货方式">
+                  <option value="">请选择</option>
+                  <option value="客户自提">客户自提</option>
+                  <option value="物流发货">物流发货</option>
+                </select>
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="newAddress">是否新地址收货 <span class="required-mark">*</span></label>
+                <select id="newAddress" data-required="true" data-label="是否新地址收货">
+                  <option value="">请选择</option>
+                  <option value="是">是</option>
+                  <option value="否">否</option>
+                </select>
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="signedStatus">是否已签收 <span class="required-mark">*</span></label>
+                <select id="signedStatus" data-required="true" data-label="是否已签收">
+                  <option value="">请选择</option>
+                  <option value="已签收">已签收</option>
+                  <option value="未签收">未签收</option>
+                </select>
+                <div class="field-error"></div>
+              </div>
+            </div>
+            <ul id="ruleNotices" class="notice-list"></ul>
+          </div>
+        </section>
+      </main>
+
+      <aside class="side-column">
+        <section class="card">
+          <div class="card-header">
+            <h2>五、客户原始内容输入</h2>
+            <span class="tag">AI 自动提取区</span>
+          </div>
+          <div class="card-body">
+            <textarea id="rawInput" class="ai-textarea" placeholder="粘贴客户邮件、工单、聊天记录或 CRM 内容..."></textarea>
+            <div class="button-row">
+              <button type="button" class="btn-primary" id="extractBtn">AI 提取信息</button>
+              <button type="button" class="btn-secondary" id="validateBtn">校验必填项</button>
+            </div>
+            <ul id="extractNotices" class="notice-list"></ul>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>六、结果输出区</h2>
+            <span>复制到物流建单系统</span>
+          </div>
+          <div class="card-body">
+            <textarea id="output" class="output-textarea" readonly></textarea>
+            <div class="button-row">
+              <button type="button" class="btn-primary" id="copyBtn">复制建单信息</button>
+              <button type="button" class="btn-outline" id="apiBtn">预留 API 建单</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <p class="footer-note">本工具为前端单文件版本；未来可在 createOrderByAPI() 中接入物流系统接口。</p>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const fields = {
+      contactName: document.getElementById("contactName"),
+      phone: document.getElementById("phone"),
+      email: document.getElementById("email"),
+      customer: document.getElementById("customer"),
+      country: document.getElementById("country"),
+      state: document.getElementById("state"),
+      city: document.getElementById("city"),
+      address: document.getElementById("address"),
+      postalCode: document.getElementById("postalCode"),
+      repairSite: document.getElementById("repairSite"),
+      supportAgent: document.getElementById("supportAgent"),
+      productCategory: document.getElementById("productCategory"),
+      productModel: document.getElementById("productModel"),
+      productName: document.getElementById("productName"),
+      machineSn: document.getElementById("machineSn"),
+      deviceArchive: document.getElementById("deviceArchive"),
+      feedback: document.getElementById("feedback"),
+      purchaseChannel: document.getElementById("purchaseChannel"),
+      purchaseDate: document.getElementById("purchaseDate"),
+      invoiceNo: document.getElementById("invoiceNo"),
+      orderNo: document.getElementById("orderNo"),
+      issueCategory: document.getElementById("issueCategory"),
+      warrantyStatus: document.getElementById("warrantyStatus"),
+      remarks: document.getElementById("remarks"),
+      orderType: document.getElementById("orderType"),
+      productSku: document.getElementById("productSku"),
+      returnSku: document.getElementById("returnSku"),
+      reshipSku: document.getElementById("reshipSku"),
+      quantity: document.getElementById("quantity"),
+      problemDescription: document.getElementById("problemDescription"),
+      serviceReason: document.getElementById("serviceReason"),
+      feeNotified: document.getElementById("feeNotified"),
+      shippingMethod: document.getElementById("shippingMethod"),
+      newAddress: document.getElementById("newAddress"),
+      signedStatus: document.getElementById("signedStatus")
+    };
+
+    const mockData = {
+      contactName: "李明",
+      phone: "+86 138 0013 8000",
+      email: "liming@example.com",
+      customer: "上海星河科技有限公司",
+      country: "中国",
+      state: "上海市",
+      city: "上海",
+      address: "浦东新区张江高科技园区晨晖路 88 号 5 号楼 1203 室",
+      postalCode: "201203",
+      repairSite: "华东寄修中心",
+      supportAgent: "客服-Amy",
+      productCategory: "智能清洁设备",
+      productModel: "SC-900 Pro",
+      productName: "商用智能清洁机器人",
+      machineSn: "SN202605270018",
+      deviceArchive: "DA-2026-0527-0018",
+      feedback: "设备开机后提示主刷异常，重启后仍无法恢复，客户申请换机处理。",
+      purchaseChannel: "官网商城",
+      purchaseDate: "2026-03-18",
+      invoiceNo: "INV202603180092",
+      orderNo: "SO202603180438",
+      issueCategory: "主刷故障",
+      warrantyStatus: "保内",
+      remarks: "客户希望优先安排同型号换机，原机寄回后同步关闭维修记录。",
+      orderType: "换机单",
+      productSku: "SC900P-CN-BLACK",
+      returnSku: "SC900P-CN-BLACK-RETURN",
+      reshipSku: "SC900P-CN-BLACK-NEW",
+      quantity: "1",
+      problemDescription: "主刷异常报警，清洁任务无法启动。",
+      serviceReason: "保内故障换机",
+      feeNotified: "是",
+      shippingMethod: "物流发货",
+      newAddress: "否",
+      signedStatus: "未签收"
+    };
+
+    const mockRawText = `客户邮件内容：
+姓名：李明
+电话：+86 138 0013 8000
+邮箱：liming@example.com
+客户：上海星河科技有限公司
+国家：中国
+省份：上海市
+城市：上海
+地址：浦东新区张江高科技园区晨晖路 88 号 5 号楼 1203 室
+邮编：201203
+产品型号：SC-900 Pro
+产品名称：商用智能清洁机器人
+SN：SN202605270018
+订单号：SO202603180438
+问题描述：设备开机后提示主刷异常，重启后仍无法恢复，客户申请换机处理。
+保修状态：保内
+建单需求：换机单`;
+
+    const rawInput = document.getElementById("rawInput");
+    const output = document.getElementById("output");
+    const statusBanner = document.getElementById("statusBanner");
+    const statusText = document.getElementById("statusText");
+    const ruleNotices = document.getElementById("ruleNotices");
+    const extractNotices = document.getElementById("extractNotices");
+    const toast = document.getElementById("toast");
+    let toastTimer;
+
+    function setValue(id, value) {
+      if (!fields[id] || value === undefined || value === null || value === "") {
+        return false;
+      }
+      fields[id].value = String(value).trim();
+      return true;
+    }
+
+    function getValue(id) {
+      return fields[id] ? fields[id].value.trim() : "";
+    }
+
+    function loadMockData() {
+      Object.keys(mockData).forEach((id) => setValue(id, mockData[id]));
+      rawInput.value = mockRawText;
+      normalizePhone();
+      refreshAll();
+      showToast("已载入 Mock 数据，可直接校验、提取或复制。");
+    }
+
+    function clearForm() {
+      Object.values(fields).forEach((field) => {
+        field.value = "";
+        clearFieldError(field);
+      });
+      rawInput.value = "";
+      extractNotices.innerHTML = "";
+      refreshAll();
+      showToast("表单已清空。");
+    }
+
+    function normalizePhone() {
+      fields.phone.value = getValue("phone").replace(/\s+/g, "");
+    }
+
+    function clearFieldError(field) {
+      field.classList.remove("is-invalid");
+      const error = field.parentElement.querySelector(".field-error");
+      if (error) {
+        error.textContent = "";
+        error.classList.remove("show");
+      }
+    }
+
+    function setFieldError(field, message) {
+      field.classList.add("is-invalid");
+      const error = field.parentElement.querySelector(".field-error");
+      if (error) {
+        error.textContent = message;
+        error.classList.add("show");
+      }
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validateForm() {
+      normalizePhone();
+      const missing = [];
+      const ruleErrors = [];
+      Object.values(fields).forEach(clearFieldError);
+
+      Object.values(fields).forEach((field) => {
+        if (field.dataset.required === "true" && !field.value.trim()) {
+          const label = field.dataset.label || "必填项";
+          missing.push(label);
+          setFieldError(field, `${label}为必填项`);
+        }
+      });
+
+      if (getValue("email") && !isValidEmail(getValue("email"))) {
+        ruleErrors.push("电子邮箱格式不正确");
+        setFieldError(fields.email, "请输入正确的邮箱格式");
+      }
+
+      if (getValue("orderType") === "换机单") {
+        if (!getValue("orderNo") || !getValue("machineSn")) {
+          ruleErrors.push("换机单缺少原机器信息：需填写原订单号和机器SN");
+        }
+        if (!getValue("orderNo")) {
+          setFieldError(fields.orderNo, "换机单缺少原订单号");
+        }
+        if (!getValue("machineSn")) {
+          setFieldError(fields.machineSn, "换机单缺少机器SN");
+        }
+      }
+
+      if (getValue("shippingMethod") === "物流发货") {
+        const logisticsRequired = [
+          ["country", "国家/地区"],
+          ["city", "城市"],
+          ["address", "详细地址"],
+          ["postalCode", "邮政编码"],
+          ["phone", "联系电话"]
+        ];
+        const absent = logisticsRequired.filter(([id]) => !getValue(id));
+        if (absent.length) {
+          ruleErrors.push(`物流发货缺少：${absent.map((item) => item[1]).join("、")}`);
+          absent.forEach(([id, label]) => setFieldError(fields[id], `物流发货时${label}必填`));
+        }
+      }
+
+      renderRuleNotices(ruleErrors);
+      updateStatus(missing.length, ruleErrors.length);
+      updateOutput();
+
+      return {
+        isValid: missing.length === 0 && ruleErrors.length === 0,
+        missingCount: missing.length,
+        ruleErrors
+      };
+    }
+
+    function updateStatus(missingCount, ruleErrorCount) {
+      statusBanner.classList.toggle("complete", missingCount === 0 && ruleErrorCount === 0);
+      statusBanner.classList.toggle("incomplete", missingCount > 0 || ruleErrorCount > 0);
+      if (missingCount === 0 && ruleErrorCount === 0) {
+        statusText.textContent = "所有必填项已完成";
+      } else {
+        statusText.textContent = `仍有 ${missingCount} 个必填项未完成`;
+      }
+    }
+
+    function renderRuleNotices(messages) {
+      ruleNotices.innerHTML = "";
+      messages.forEach((message) => {
+        const item = document.createElement("li");
+        item.className = "error";
+        item.textContent = message;
+        ruleNotices.appendChild(item);
+      });
+    }
+
+    function refreshAll() {
+      validateForm();
+      updateOutput();
+    }
+
+    function buildOrderText() {
+      const rows = [
+        ["联系人姓名", getValue("contactName")],
+        ["联系电话", getValue("phone")],
+        ["电子邮箱", getValue("email")],
+        ["国家/地区", getValue("country")],
+        ["州/省", getValue("state")],
+        ["城市", getValue("city")],
+        ["详细地址", getValue("address")],
+        ["邮政编码", getValue("postalCode")],
+        ["产品型号", getValue("productModel")],
+        ["产品名称", getValue("productName")],
+        ["车牌号", getValue("machineSn")],
+        ["反馈内容", getValue("feedback")],
+        ["建单需求", getValue("orderType")],
+        ["质保状态", getValue("warrantyStatus")],
+        ["问题描述", getValue("problemDescription")]
+      ];
+      return rows.map(([label, value]) => `${label}：${value}`).join("\n");
+    }
+
+    function updateOutput() {
+      output.value = buildOrderText();
+    }
+
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add("show");
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    function firstMatch(text, patterns) {
+      for (const pattern of patterns) {
+        const match = text.match(pattern);
+        if (match && match[1]) {
+          return match[1].replace(/[，,。；;\n\r]+$/g, "").trim();
+        }
+      }
+      return "";
+    }
+
+    function detectOrderType(text) {
+      if (/换机|更换新机|replacement|exchange/i.test(text)) return "换机单";
+      if (/维修|寄修|repair|检修/i.test(text)) return "维修单";
+      if (/退货|退回|退件|return/i.test(text)) return "退件单";
+      if (/补发|补寄|重发|发货|reship|ship/i.test(text)) return "发货单";
+      return "";
+    }
+
+    function detectWarranty(text) {
+      if (/保内|质保内|保修期内|under warranty|in warranty/i.test(text)) return "保内";
+      if (/保外|过保|超保|out of warranty|expired/i.test(text)) return "保外";
+      return "";
+    }
+
+    function extractInfoFromText() {
+      const text = rawInput.value.trim();
+      if (!text) {
+        showToast("请先粘贴客户原始内容。");
+        return;
+      }
+
+      const extracted = {
+        contactName: firstMatch(text, [
+          /(?:联系人|姓名|客户姓名|收件人|Name)\s*[:：]\s*([^\n,，;；]+)/i,
+          /(?:我是|我叫)\s*([\u4e00-\u9fa5]{2,5})/
+        ]),
+        phone: firstMatch(text, [
+          /(?:电话|手机|联系电话|手机号|Phone|Tel)\s*[:：]\s*([+\d][\d\s\-()]{6,})/i,
+          /(\+?\d[\d\s\-()]{7,}\d)/
+        ]),
+        email: firstMatch(text, [
+          /([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i
+        ]),
+        customer: firstMatch(text, [
+          /(?:客户|公司|单位|Customer|Company)\s*[:：]\s*([^\n,，;；]+)/i
+        ]),
+        country: firstMatch(text, [
+          /(?:国家|国家\/地区|地区|Country)\s*[:：]\s*([^\n,，;；]+)/i
+        ]),
+        state: firstMatch(text, [
+          /(?:省|省份|州|State|Province)\s*[:：]\s*([^\n,，;；]+)/i
+        ]),
+        city: firstMatch(text, [
+          /(?:城市|市|City)\s*[:：]\s*([^\n,，;；]+)/i
+        ]),
+        address: firstMatch(text, [
+          /(?:详细地址|收货地址|寄送地址|地址|Address)\s*[:：]\s*([^\n]+)/i
+        ]),
+        postalCode: firstMatch(text, [
+          /(?:邮政编码|邮编|邮码|Zip|Postal Code|Postcode)\s*[:：]\s*([A-Z0-9\-\s]{4,12})/i
+        ]),
+        productModel: firstMatch(text, [
+          /(?:产品型号|型号|Model)\s*[:：]\s*([A-Z0-9][A-Z0-9\-_.\s]{1,40})/i
+        ]),
+        productName: firstMatch(text, [
+          /(?:产品名称|品名|Product Name|Product)\s*[:：]\s*([^\n,，;；]+)/i
+        ]),
+        machineSn: firstMatch(text, [
+          /(?:车牌号|机器SN|设备SN|序列号|SN|Serial No\.?|Serial)\s*[:：#]?\s*([A-Z0-9][A-Z0-9\-_.]{5,})/i
+        ]),
+        orderNo: firstMatch(text, [
+          /(?:原订单号|订单号|Order No\.?|Order ID)\s*[:：#]?\s*([A-Z0-9][A-Z0-9\-_.]{5,})/i
+        ]),
+        feedback: firstMatch(text, [
+          /(?:反馈内容|客户反馈|问题描述|故障描述|Issue|Problem)\s*[:：]\s*([\s\S]{8,180})/i
+        ])
+      };
+
+      extracted.problemDescription = extracted.feedback;
+      extracted.warrantyStatus = firstMatch(text, [
+        /(?:质保状态|保修状态|Warranty)\s*[:：]\s*(保内|保外|质保内|保修期内|过保|超保|under warranty|out of warranty)/i
+      ]);
+      if (/质保内|保修期内|under warranty/i.test(extracted.warrantyStatus)) {
+        extracted.warrantyStatus = "保内";
+      }
+      if (/过保|超保|out of warranty/i.test(extracted.warrantyStatus)) {
+        extracted.warrantyStatus = "保外";
+      }
+      if (!extracted.warrantyStatus) {
+        extracted.warrantyStatus = detectWarranty(text);
+      }
+
+      extracted.orderType = firstMatch(text, [
+        /(?:建单需求|单据类型|售后类型|需求)\s*[:：]\s*(发货单|维修单|退件单|换机单)/i
+      ]) || detectOrderType(text);
+
+      const filled = [];
+      Object.entries(extracted).forEach(([id, value]) => {
+        if (setValue(id, value)) {
+          filled.push(fields[id].dataset.label || id);
+        }
+      });
+
+      if (!getValue("feedback") && text.length > 0) {
+        const fallback = text.replace(/\s+/g, " ").slice(0, 160);
+        setValue("feedback", fallback);
+        setValue("problemDescription", fallback);
+        filled.push("反馈内容");
+      }
+
+      normalizePhone();
+      renderExtractNotices(filled);
+      refreshAll();
+      showToast(filled.length ? `AI 已提取 ${filled.length} 个字段。` : "未识别到可填入字段，请检查原文格式。");
+    }
+
+    function renderExtractNotices(filled) {
+      extractNotices.innerHTML = "";
+      const item = document.createElement("li");
+      if (filled.length) {
+        item.textContent = `已自动填入：${Array.from(new Set(filled)).join("、")}`;
+      } else {
+        item.className = "error";
+        item.textContent = "未识别到字段。建议使用“字段名：内容”的格式粘贴原文。";
+      }
+      extractNotices.appendChild(item);
+    }
+
+    async function copyOrderText() {
+      const result = validateForm();
+      const text = buildOrderText();
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(result.isValid ? "建单信息已复制。" : "已复制当前信息，但仍有必填或规则问题待处理。");
+      } catch (error) {
+        output.focus();
+        output.select();
+        document.execCommand("copy");
+        showToast("建单信息已复制。");
+      }
+    }
+
+    async function createOrderByAPI() {
+      const payload = Object.fromEntries(
+        Object.entries(fields).map(([id, field]) => [id, field.value.trim()])
+      );
+      console.log("预留 API 建单 payload：", payload);
+      showToast("API 接口预留成功：当前版本仅在控制台输出 payload。");
+      return payload;
+    }
+
+    Object.values(fields).forEach((field) => {
+      field.addEventListener("input", refreshAll);
+      field.addEventListener("change", refreshAll);
+    });
+
+    fields.phone.addEventListener("blur", () => {
+      normalizePhone();
+      refreshAll();
+    });
+
+    document.getElementById("extractBtn").addEventListener("click", extractInfoFromText);
+    document.getElementById("validateBtn").addEventListener("click", () => {
+      const result = validateForm();
+      showToast(result.isValid ? "校验通过，所有必填项已完成。" : "校验未通过，请查看红框字段。");
+    });
+    document.getElementById("copyBtn").addEventListener("click", copyOrderText);
+    document.getElementById("apiBtn").addEventListener("click", createOrderByAPI);
+    document.getElementById("loadMockBtn").addEventListener("click", loadMockData);
+    document.getElementById("clearBtn").addEventListener("click", clearForm);
+
+    loadMockData();
+  </script>
+</body>
+</html>
