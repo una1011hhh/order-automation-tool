@@ -253,6 +253,86 @@
       font-size: 13px;
     }
 
+    .export-tip {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .clean-data-list {
+      display: grid;
+      gap: 8px;
+      max-height: 430px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .clean-section {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: #e5e7eb;
+      color: #374151;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .clean-row {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr) 62px;
+      gap: 8px;
+      align-items: stretch;
+      padding: 8px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fbfdff;
+    }
+
+    .clean-label {
+      display: flex;
+      align-items: center;
+      color: #4b5563;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .clean-value {
+      min-height: 34px;
+      padding: 8px 9px;
+      border-radius: 8px;
+      background: #f3f6fb;
+      color: #111827;
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .clean-value.empty {
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    .copy-field-btn {
+      padding: 0 10px;
+      min-height: 34px;
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      background: #fff;
+      color: var(--primary);
+      font-size: 12px;
+      box-shadow: none;
+    }
+
+    .copy-field-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+      transform: none;
+    }
+
     .button-row {
       display: flex;
       flex-wrap: wrap;
@@ -399,6 +479,10 @@
 
       .main-grid,
       .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .clean-row {
         grid-template-columns: 1fr;
       }
     }
@@ -690,12 +774,14 @@
         <section class="card">
           <div class="card-header">
             <h2>六、结果输出区</h2>
-            <span>复制到物流建单系统</span>
+            <span>逐项复制 / 导出清洗数据</span>
           </div>
           <div class="card-body">
-            <textarea id="output" class="output-textarea" readonly></textarea>
+            <p class="export-tip">下方是已清洗、格式化后的字段值。物流系统不能整段粘贴时，可逐行点击“复制”。</p>
+            <div id="cleanDataList" class="clean-data-list"></div>
             <div class="button-row">
-              <button type="button" class="btn-primary" id="copyBtn">复制建单信息</button>
+              <button type="button" class="btn-primary" id="exportJsonBtn">导出 JSON</button>
+              <button type="button" class="btn-outline" id="exportCsvBtn">导出 CSV</button>
               <button type="button" class="btn-outline" id="apiBtn">预留 API 建单</button>
             </div>
           </div>
@@ -804,13 +890,51 @@ SN：SN202605270018
 建单需求：换机单`;
 
     const rawInput = document.getElementById("rawInput");
-    const output = document.getElementById("output");
+    const cleanDataList = document.getElementById("cleanDataList");
     const statusBanner = document.getElementById("statusBanner");
     const statusText = document.getElementById("statusText");
     const ruleNotices = document.getElementById("ruleNotices");
     const extractNotices = document.getElementById("extractNotices");
     const toast = document.getElementById("toast");
     let toastTimer;
+
+    const outputFieldOrder = [
+      { section: "客户信息", id: "contactName", label: "联系人姓名" },
+      { section: "客户信息", id: "phone", label: "联系电话" },
+      { section: "客户信息", id: "email", label: "电子邮箱" },
+      { section: "客户信息", id: "customer", label: "客户" },
+      { section: "客户信息", id: "country", label: "国家/地区" },
+      { section: "客户信息", id: "state", label: "州/省" },
+      { section: "客户信息", id: "city", label: "城市" },
+      { section: "客户信息", id: "address", label: "详细地址" },
+      { section: "客户信息", id: "postalCode", label: "邮政编码" },
+      { section: "客户信息", id: "repairSite", label: "寄修网点" },
+      { section: "客户信息", id: "supportAgent", label: "客服" },
+      { section: "产品信息", id: "productCategory", label: "产品类别" },
+      { section: "产品信息", id: "productModel", label: "产品型号" },
+      { section: "产品信息", id: "productName", label: "产品名称" },
+      { section: "产品信息", id: "machineSn", label: "车牌号（机器SN）" },
+      { section: "产品信息", id: "deviceArchive", label: "设备档案" },
+      { section: "产品信息", id: "feedback", label: "反馈内容" },
+      { section: "产品信息", id: "purchaseChannel", label: "购买渠道" },
+      { section: "产品信息", id: "purchaseDate", label: "购买日期" },
+      { section: "产品信息", id: "invoiceNo", label: "发票号" },
+      { section: "产品信息", id: "orderNo", label: "订单号" },
+      { section: "产品信息", id: "issueCategory", label: "问题分类" },
+      { section: "产品信息", id: "warrantyStatus", label: "质保状态" },
+      { section: "产品信息", id: "remarks", label: "备注" },
+      { section: "售后信息", id: "orderType", label: "建单需求" },
+      { section: "售后信息", id: "productSku", label: "产品 SKU" },
+      { section: "售后信息", id: "returnSku", label: "退回产品 SKU" },
+      { section: "售后信息", id: "reshipSku", label: "补发 SKU" },
+      { section: "售后信息", id: "quantity", label: "数量" },
+      { section: "售后信息", id: "problemDescription", label: "故障/问题描述" },
+      { section: "售后信息", id: "serviceReason", label: "退件/补发/发货原因" },
+      { section: "售后信息", id: "feeNotified", label: "是否告知手续费" },
+      { section: "发货信息", id: "shippingMethod", label: "发货方式" },
+      { section: "发货信息", id: "newAddress", label: "是否新地址收货" },
+      { section: "发货信息", id: "signedStatus", label: "是否已签收" }
+    ];
 
     function setValue(id, value) {
       if (!fields[id] || value === undefined || value === null || value === "") {
@@ -829,7 +953,7 @@ SN：SN202605270018
       rawInput.value = mockRawText;
       normalizePhone();
       refreshAll();
-      showToast("已载入 Mock 数据，可直接校验、提取或复制。");
+      showToast("已载入 Mock 数据，可直接校验、提取、逐项复制或导出。");
     }
 
     function clearForm() {
@@ -845,6 +969,27 @@ SN：SN202605270018
 
     function normalizePhone() {
       fields.phone.value = getValue("phone").replace(/\s+/g, "");
+    }
+
+    function cleanFieldValue(id, value) {
+      let cleaned = String(value || "").replace(/\s+/g, " ").trim();
+      if (id === "phone") {
+        cleaned = cleaned.replace(/\s+/g, "");
+      }
+      if (id === "email") {
+        cleaned = cleaned.toLowerCase();
+      }
+      if (["machineSn", "deviceArchive", "invoiceNo", "orderNo", "productSku", "returnSku", "reshipSku"].includes(id)) {
+        cleaned = cleaned.toUpperCase();
+      }
+      return cleaned;
+    }
+
+    function getCleanedRows() {
+      return outputFieldOrder.map((item) => ({
+        ...item,
+        value: cleanFieldValue(item.id, getValue(item.id))
+      }));
     }
 
     function clearFieldError(field) {
@@ -952,28 +1097,46 @@ SN：SN202605270018
     }
 
     function buildOrderText() {
-      const rows = [
-        ["联系人姓名", getValue("contactName")],
-        ["联系电话", getValue("phone")],
-        ["电子邮箱", getValue("email")],
-        ["国家/地区", getValue("country")],
-        ["州/省", getValue("state")],
-        ["城市", getValue("city")],
-        ["详细地址", getValue("address")],
-        ["邮政编码", getValue("postalCode")],
-        ["产品型号", getValue("productModel")],
-        ["产品名称", getValue("productName")],
-        ["车牌号", getValue("machineSn")],
-        ["反馈内容", getValue("feedback")],
-        ["建单需求", getValue("orderType")],
-        ["质保状态", getValue("warrantyStatus")],
-        ["问题描述", getValue("problemDescription")]
-      ];
-      return rows.map(([label, value]) => `${label}：${value}`).join("\n");
+      return getCleanedRows().map((row) => `${row.label}：${row.value}`).join("\n");
     }
 
     function updateOutput() {
-      output.value = buildOrderText();
+      renderCleanDataList();
+    }
+
+    function renderCleanDataList() {
+      cleanDataList.innerHTML = "";
+      let currentSection = "";
+      getCleanedRows().forEach((row) => {
+        if (row.section !== currentSection) {
+          currentSection = row.section;
+          const section = document.createElement("div");
+          section.className = "clean-section";
+          section.textContent = currentSection;
+          cleanDataList.appendChild(section);
+        }
+
+        const line = document.createElement("div");
+        line.className = "clean-row";
+
+        const label = document.createElement("div");
+        label.className = "clean-label";
+        label.textContent = row.label;
+
+        const value = document.createElement("div");
+        value.className = row.value ? "clean-value" : "clean-value empty";
+        value.textContent = row.value || "未填写";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "copy-field-btn";
+        button.textContent = "复制";
+        button.disabled = !row.value;
+        button.addEventListener("click", () => copySingleField(row.label, row.value));
+
+        line.append(label, value, button);
+        cleanDataList.appendChild(line);
+      });
     }
 
     function showToast(message) {
@@ -1111,24 +1274,68 @@ SN：SN202605270018
       extractNotices.appendChild(item);
     }
 
-    async function copyOrderText() {
-      const result = validateForm();
-      const text = buildOrderText();
+    async function copyText(text) {
       try {
         await navigator.clipboard.writeText(text);
-        showToast(result.isValid ? "建单信息已复制。" : "已复制当前信息，但仍有必填或规则问题待处理。");
       } catch (error) {
-        output.focus();
-        output.select();
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
         document.execCommand("copy");
-        showToast("建单信息已复制。");
+        textarea.remove();
       }
     }
 
+    async function copySingleField(label, value) {
+      await copyText(value);
+      showToast(`已复制字段：${label}`);
+    }
+
+    function buildExportObject() {
+      return getCleanedRows().reduce((result, row) => {
+        result[row.label] = row.value;
+        return result;
+      }, {});
+    }
+
+    function escapeCsv(value) {
+      return `"${String(value || "").replace(/"/g, '""')}"`;
+    }
+
+    function downloadFile(filename, content, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportCleanedData(format) {
+      validateForm();
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      if (format === "json") {
+        const content = JSON.stringify(buildExportObject(), null, 2);
+        downloadFile(`售后物流建单清洗数据-${timestamp}.json`, content, "application/json;charset=utf-8");
+        showToast("已导出 JSON 清洗数据。");
+        return;
+      }
+
+      const csvRows = [["字段", "清洗后数据"], ...getCleanedRows().map((row) => [row.label, row.value])];
+      const content = csvRows.map((row) => row.map(escapeCsv).join(",")).join("\n");
+      downloadFile(`售后物流建单清洗数据-${timestamp}.csv`, "\ufeff" + content, "text/csv;charset=utf-8");
+      showToast("已导出 CSV 清洗数据。");
+    }
+
     async function createOrderByAPI() {
-      const payload = Object.fromEntries(
-        Object.entries(fields).map(([id, field]) => [id, field.value.trim()])
-      );
+      const payload = Object.fromEntries(getCleanedRows().map((row) => [row.id, row.value]));
       console.log("预留 API 建单 payload：", payload);
       showToast("API 接口预留成功：当前版本仅在控制台输出 payload。");
       return payload;
@@ -1149,7 +1356,8 @@ SN：SN202605270018
       const result = validateForm();
       showToast(result.isValid ? "校验通过，所有必填项已完成。" : "校验未通过，请查看红框字段。");
     });
-    document.getElementById("copyBtn").addEventListener("click", copyOrderText);
+    document.getElementById("exportJsonBtn").addEventListener("click", () => exportCleanedData("json"));
+    document.getElementById("exportCsvBtn").addEventListener("click", () => exportCleanedData("csv"));
     document.getElementById("apiBtn").addEventListener("click", createOrderByAPI);
     document.getElementById("loadMockBtn").addEventListener("click", loadMockData);
     document.getElementById("clearBtn").addEventListener("click", clearForm);
