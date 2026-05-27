@@ -19,8 +19,8 @@
       --success-bg: #ecfdf5;
       --warning: #b45309;
       --warning-bg: #fffbeb;
-      --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-      --radius: 14px;
+      --shadow: 0 8px 22px rgba(15, 23, 42, 0.07);
+      --radius: 10px;
     }
 
     * {
@@ -33,11 +33,11 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
         "Microsoft YaHei", Arial, sans-serif;
       color: var(--text);
-      background: linear-gradient(180deg, #f7f8fb 0%, var(--bg) 100%);
+      background: linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
     }
 
     .app-shell {
-      width: 1180px;
+      width: 1220px;
       margin: 0 auto;
       padding: 24px 0 44px;
     }
@@ -47,10 +47,11 @@
       align-items: center;
       justify-content: space-between;
       gap: 24px;
-      padding: 22px 26px;
-      margin-bottom: 18px;
-      background: #172033;
-      border-radius: 18px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      background: linear-gradient(90deg, #10233f 0%, #18345d 100%);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
       color: #fff;
       box-shadow: var(--shadow);
     }
@@ -82,13 +83,27 @@
       padding: 13px 16px;
       margin-bottom: 18px;
       border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: 10px;
       background: var(--card);
       box-shadow: 0 5px 16px rgba(15, 23, 42, 0.05);
     }
 
+    .status-content {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
     .status-banner strong {
       font-size: 15px;
+    }
+
+    .missing-detail {
+      margin: 0;
+      color: inherit;
+      font-size: 13px;
+      line-height: 1.45;
+      opacity: 0.92;
     }
 
     .status-banner.complete {
@@ -125,7 +140,7 @@
     .card {
       background: var(--card);
       border: 1px solid rgba(217, 222, 231, 0.9);
-      border-radius: var(--radius);
+      border-radius: 10px;
       box-shadow: var(--shadow);
       overflow: hidden;
     }
@@ -136,7 +151,8 @@
       justify-content: space-between;
       padding: 16px 18px;
       border-bottom: 1px solid var(--line);
-      background: #f8fafc;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-left: 4px solid #315c9b;
     }
 
     .card-header h2 {
@@ -235,6 +251,20 @@
       display: block;
     }
 
+    .field.logistics-focus input,
+    .field.logistics-focus textarea {
+      border-color: rgba(37, 99, 235, 0.62);
+      background: #f8fbff;
+    }
+
+    .dynamic-required {
+      display: none;
+    }
+
+    .dynamic-required.show {
+      display: inline;
+    }
+
     .side-column {
       display: grid;
       gap: 18px;
@@ -324,6 +354,54 @@
       cursor: not-allowed;
       opacity: 0.48;
       transform: none;
+    }
+
+    .logistics-panel {
+      display: none;
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      border-radius: 10px;
+      background: #f8fbff;
+    }
+
+    .logistics-panel.show {
+      display: block;
+    }
+
+    .logistics-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: #1e3a8a;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .logistics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .logistics-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 9px;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      background: #fff;
+      color: #1f2937;
+      font-size: 12px;
+    }
+
+    .logistics-chip.missing {
+      border-color: rgba(220, 38, 38, 0.26);
+      background: var(--danger-bg);
+      color: var(--danger);
     }
 
     .button-row {
@@ -495,7 +573,10 @@
     </header>
 
     <section id="statusBanner" class="status-banner incomplete" aria-live="polite">
-      <strong id="statusText">仍有 0 个必填项未完成</strong>
+      <div class="status-content">
+        <strong id="statusText">仍有 0 个必填项未完成</strong>
+        <p id="missingDetail" class="missing-detail">当前缺少：无</p>
+      </div>
       <span class="hint">带 <span class="required-mark">*</span> 的字段为必填；红框表示需要补充或格式错误。</span>
     </section>
 
@@ -615,7 +696,7 @@
                 <div class="field-error"></div>
               </div>
               <div class="field">
-                <label for="orderNo">订单号</label>
+                <label for="orderNo">订单号 <span id="orderNoRequiredMark" class="required-mark dynamic-required">*</span></label>
                 <input id="orderNo" data-label="订单号" type="text" />
                 <div class="field-error"></div>
               </div>
@@ -743,6 +824,13 @@
                 <div class="field-error"></div>
               </div>
             </div>
+            <div id="logisticsPanel" class="logistics-panel" aria-hidden="true">
+              <div class="logistics-title">
+                <span>物流发货地址字段</span>
+                <span>请确认以下字段已填写</span>
+              </div>
+              <div id="logisticsAddressChecklist" class="logistics-grid"></div>
+            </div>
             <ul id="ruleNotices" class="notice-list"></ul>
           </div>
         </section>
@@ -773,8 +861,10 @@
             <p class="export-tip">下方是已清洗、格式化后的字段值。物流系统不能整段粘贴时，可逐行点击“复制”。</p>
             <div id="cleanDataList" class="clean-data-list"></div>
             <div class="button-row">
-              <button type="button" class="btn-primary" id="exportJsonBtn">导出 JSON</button>
+              <button type="button" class="btn-primary" id="copyAllBtn">复制全部建单信息</button>
+              <button type="button" class="btn-outline" id="exportJsonBtn">导出 JSON</button>
               <button type="button" class="btn-outline" id="exportCsvBtn">导出 CSV</button>
+              <button type="button" class="btn-outline" id="exportExcelBtn">导出 Excel</button>
               <button type="button" class="btn-outline" id="apiBtn">预留 API 建单</button>
             </div>
           </div>
@@ -886,10 +976,16 @@ SN：SN202605270018
     const cleanDataList = document.getElementById("cleanDataList");
     const statusBanner = document.getElementById("statusBanner");
     const statusText = document.getElementById("statusText");
+    const missingDetail = document.getElementById("missingDetail");
+    const logisticsPanel = document.getElementById("logisticsPanel");
+    const logisticsAddressChecklist = document.getElementById("logisticsAddressChecklist");
+    const orderNoRequiredMark = document.getElementById("orderNoRequiredMark");
     const ruleNotices = document.getElementById("ruleNotices");
     const extractNotices = document.getElementById("extractNotices");
     const toast = document.getElementById("toast");
     let toastTimer;
+
+    const logisticsFieldIds = ["country", "city", "address", "postalCode", "phone"];
 
     const outputFieldOrder = [
       { section: "客户信息", id: "contactName", label: "联系人姓名" },
@@ -985,6 +1081,39 @@ SN：SN202605270018
       }));
     }
 
+    function getUniqueValues(values) {
+      return Array.from(new Set(values.filter(Boolean)));
+    }
+
+    function updateDynamicRequirements() {
+      const isExchangeOrder = getValue("orderType") === "换机单";
+      fields.orderNo.dataset.required = isExchangeOrder ? "true" : "false";
+      orderNoRequiredMark.classList.toggle("show", isExchangeOrder);
+    }
+
+    function updateLogisticsVisibility() {
+      const shouldShow = getValue("shippingMethod") === "物流发货";
+      logisticsPanel.classList.toggle("show", shouldShow);
+      logisticsPanel.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+
+      logisticsFieldIds.forEach((id) => {
+        fields[id].closest(".field").classList.toggle("logistics-focus", shouldShow);
+      });
+
+      logisticsAddressChecklist.innerHTML = "";
+      if (!shouldShow) {
+        return;
+      }
+
+      logisticsFieldIds.forEach((id) => {
+        const chip = document.createElement("div");
+        const value = getValue(id);
+        chip.className = value ? "logistics-chip" : "logistics-chip missing";
+        chip.innerHTML = `<strong>${fields[id].dataset.label}</strong><span>${value ? "已填写" : "缺失"}</span>`;
+        logisticsAddressChecklist.appendChild(chip);
+      });
+    }
+
     function clearFieldError(field) {
       field.classList.remove("is-invalid");
       const error = field.parentElement.querySelector(".field-error");
@@ -1009,6 +1138,8 @@ SN：SN202605270018
 
     function validateForm() {
       normalizePhone();
+      updateDynamicRequirements();
+      updateLogisticsVisibility();
       const missing = [];
       const ruleErrors = [];
       Object.values(fields).forEach(clearFieldError);
@@ -1054,23 +1185,30 @@ SN：SN202605270018
       }
 
       renderRuleNotices(ruleErrors);
-      updateStatus(missing.length, ruleErrors.length);
+      updateStatus(getUniqueValues(missing), ruleErrors);
       updateOutput();
 
       return {
         isValid: missing.length === 0 && ruleErrors.length === 0,
-        missingCount: missing.length,
+        missingCount: getUniqueValues(missing).length,
+        missingFields: getUniqueValues(missing),
         ruleErrors
       };
     }
 
-    function updateStatus(missingCount, ruleErrorCount) {
+    function updateStatus(missingFields, ruleErrors) {
+      const missingCount = missingFields.length;
+      const ruleErrorCount = ruleErrors.length;
       statusBanner.classList.toggle("complete", missingCount === 0 && ruleErrorCount === 0);
       statusBanner.classList.toggle("incomplete", missingCount > 0 || ruleErrorCount > 0);
       if (missingCount === 0 && ruleErrorCount === 0) {
         statusText.textContent = "所有必填项已完成";
+        missingDetail.textContent = "当前缺少：无";
       } else {
         statusText.textContent = `仍有 ${missingCount} 个必填项未完成`;
+        missingDetail.textContent = missingCount
+          ? `当前缺少：${missingFields.join("、")}`
+          : `规则提示：${ruleErrors.join("；")}`;
       }
     }
 
@@ -1135,6 +1273,65 @@ SN：SN202605270018
       toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
     }
 
+    function escapeRegExp(value) {
+      return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function normalizeSourceText(text) {
+      return text
+        .replace(/\r/g, "\n")
+        .replace(/[：]/g, ":")
+        .replace(/[ \t]+/g, " ")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+    }
+
+    function valueByLabels(text, labels) {
+      const labelPattern = labels.map(escapeRegExp).join("|");
+      const pattern = new RegExp(`(?:^|\\n)\\s*(?:${labelPattern})\\s*[:#：-]?\\s*([^\\n]+)`, "i");
+      const match = text.match(pattern);
+      return match && match[1] ? match[1].replace(/[，,。；;]+$/g, "").trim() : "";
+    }
+
+    function multilineValueByLabels(text, labels) {
+      const labelPattern = labels.map(escapeRegExp).join("|");
+      const boundaryLabels = [
+        "姓名", "联系人", "收件人", "电话", "手机", "邮箱", "电子邮箱", "国家",
+        "国家/地区", "省", "省份", "城市", "市", "地址", "收货地址", "邮编",
+        "邮政编码", "SN", "机器SN", "设备SN", "序列号", "产品型号", "型号",
+        "产品名称", "订单号", "原订单号", "建单需求", "单据类型", "质保状态",
+        "保修状态", "购买渠道", "发票号"
+      ].map(escapeRegExp).join("|");
+      const pattern = new RegExp(
+        `(?:^|\\n)\\s*(?:${labelPattern})\\s*[:#：-]?\\s*([\\s\\S]*?)(?=\\n\\s*(?:${boundaryLabels})\\s*[:#：-]|$)`,
+        "i"
+      );
+      const match = text.match(pattern);
+      return match && match[1] ? match[1].replace(/\s+/g, " ").replace(/[，,。；;]+$/g, "").trim() : "";
+    }
+
+    function detectCountry(text) {
+      const labeled = valueByLabels(text, ["国家", "国家/地区", "地区", "Country", "Region"]);
+      if (labeled) return labeled;
+      if (/中国|China|CN\b/i.test(text)) return "中国";
+      if (/美国|United States|USA|US\b/i.test(text)) return "美国";
+      if (/英国|United Kingdom|UK\b/i.test(text)) return "英国";
+      if (/德国|Germany|DE\b/i.test(text)) return "德国";
+      if (/法国|France|FR\b/i.test(text)) return "法国";
+      if (/加拿大|Canada|CA\b/i.test(text)) return "加拿大";
+      if (/澳大利亚|Australia|AU\b/i.test(text)) return "澳大利亚";
+      return "";
+    }
+
+    function detectAddress(text) {
+      const labeled = valueByLabels(text, ["详细地址", "收货地址", "寄送地址", "地址", "Address", "Ship to", "Shipping Address"]);
+      if (labeled) return labeled;
+      const line = text.split("\n").find((item) =>
+        /(路|街|道|号|室|栋|Road|Rd\.|Street|St\.|Ave|Avenue|Building|Floor|Room)/i.test(item)
+      );
+      return line ? line.replace(/^(地址|Address)\s*[:：-]?\s*/i, "").trim() : "";
+    }
+
     function firstMatch(text, patterns) {
       for (const pattern of patterns) {
         const match = text.match(pattern);
@@ -1160,62 +1357,47 @@ SN：SN202605270018
     }
 
     function extractInfoFromText() {
-      const text = rawInput.value.trim();
+      const text = normalizeSourceText(rawInput.value);
       if (!text) {
         showToast("请先粘贴客户原始内容。");
         return;
       }
 
       const extracted = {
-        contactName: firstMatch(text, [
-          /(?:联系人|姓名|客户姓名|收件人|Name)\s*[:：]\s*([^\n,，;；]+)/i,
-          /(?:我是|我叫)\s*([\u4e00-\u9fa5]{2,5})/
+        contactName: valueByLabels(text, ["联系人", "姓名", "客户姓名", "收件人", "Name", "Contact", "Receiver"]) || firstMatch(text, [
+          /(?:我是|我叫|客户叫)\s*([\u4e00-\u9fa5]{2,5})/,
+          /(?:This is|I am|I'm)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})/i
         ]),
-        phone: firstMatch(text, [
-          /(?:电话|手机|联系电话|手机号|Phone|Tel)\s*[:：]\s*([+\d][\d\s\-()]{6,})/i,
+        phone: valueByLabels(text, ["电话", "手机", "联系电话", "手机号", "Phone", "Tel", "Mobile", "Contact Number"]) || firstMatch(text, [
           /(\+?\d[\d\s\-()]{7,}\d)/
         ]),
-        email: firstMatch(text, [
+        email: valueByLabels(text, ["邮箱", "电子邮箱", "Email", "E-mail", "Mail"]) || firstMatch(text, [
           /([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i
         ]),
-        customer: firstMatch(text, [
-          /(?:客户|公司|单位|Customer|Company)\s*[:：]\s*([^\n,，;；]+)/i
+        customer: valueByLabels(text, ["客户", "公司", "单位", "Customer", "Company"]),
+        country: detectCountry(text),
+        state: valueByLabels(text, ["省", "省份", "州", "State", "Province"]),
+        city: valueByLabels(text, ["城市", "市", "City"]),
+        address: detectAddress(text),
+        postalCode: valueByLabels(text, ["邮政编码", "邮编", "邮码", "Zip", "Zip Code", "Postal Code", "Postcode"]) || firstMatch(text, [
+          /\b([A-Z]\d[A-Z]\s?\d[A-Z]\d|\d{5}(?:-\d{4})?|\d{6})\b/i
         ]),
-        country: firstMatch(text, [
-          /(?:国家|国家\/地区|地区|Country)\s*[:：]\s*([^\n,，;；]+)/i
+        productModel: valueByLabels(text, ["产品型号", "型号", "Model", "Product Model"]) || firstMatch(text, [
+          /(?:型号|model)\s*(?:是|为|:)?\s*([A-Z0-9][A-Z0-9\-_.\s]{1,40})/i
         ]),
-        state: firstMatch(text, [
-          /(?:省|省份|州|State|Province)\s*[:：]\s*([^\n,，;；]+)/i
+        productName: valueByLabels(text, ["产品名称", "品名", "Product Name", "Product"]),
+        machineSn: valueByLabels(text, ["车牌号", "机器SN", "设备SN", "序列号", "SN", "S/N", "Serial No.", "Serial", "Serial Number"]) || firstMatch(text, [
+          /\b(?:SN|S\/N|Serial No\.?|Serial Number)\s*[:#-]?\s*([A-Z0-9][A-Z0-9\-_.]{5,})\b/i,
+          /\b([A-Z]{1,4}\d{6,}[A-Z0-9\-_.]*)\b/i
         ]),
-        city: firstMatch(text, [
-          /(?:城市|市|City)\s*[:：]\s*([^\n,，;；]+)/i
-        ]),
-        address: firstMatch(text, [
-          /(?:详细地址|收货地址|寄送地址|地址|Address)\s*[:：]\s*([^\n]+)/i
-        ]),
-        postalCode: firstMatch(text, [
-          /(?:邮政编码|邮编|邮码|Zip|Postal Code|Postcode)\s*[:：]\s*([A-Z0-9\-\s]{4,12})/i
-        ]),
-        productModel: firstMatch(text, [
-          /(?:产品型号|型号|Model)\s*[:：]\s*([A-Z0-9][A-Z0-9\-_.\s]{1,40})/i
-        ]),
-        productName: firstMatch(text, [
-          /(?:产品名称|品名|Product Name|Product)\s*[:：]\s*([^\n,，;；]+)/i
-        ]),
-        machineSn: firstMatch(text, [
-          /(?:车牌号|机器SN|设备SN|序列号|SN|Serial No\.?|Serial)\s*[:：#]?\s*([A-Z0-9][A-Z0-9\-_.]{5,})/i
-        ]),
-        orderNo: firstMatch(text, [
-          /(?:原订单号|订单号|Order No\.?|Order ID)\s*[:：#]?\s*([A-Z0-9][A-Z0-9\-_.]{5,})/i
-        ]),
-        feedback: firstMatch(text, [
-          /(?:反馈内容|客户反馈|问题描述|故障描述|Issue|Problem)\s*[:：]\s*([\s\S]{8,180})/i
-        ])
+        orderNo: valueByLabels(text, ["原订单号", "订单号", "Order No.", "Order ID", "Original Order", "Order Number"]),
+        feedback: multilineValueByLabels(text, ["反馈内容", "客户反馈", "问题描述", "故障描述", "故障/问题描述", "Issue", "Problem", "Fault", "Description"])
       };
 
-      extracted.problemDescription = extracted.feedback;
-      extracted.warrantyStatus = firstMatch(text, [
-        /(?:质保状态|保修状态|Warranty)\s*[:：]\s*(保内|保外|质保内|保修期内|过保|超保|under warranty|out of warranty)/i
+      extracted.problemDescription = extracted.feedback || multilineValueByLabels(text, ["需要处理的问题", "异常现象", "Failure", "Symptom"]);
+      extracted.feedback = extracted.feedback || extracted.problemDescription;
+      extracted.warrantyStatus = valueByLabels(text, ["质保状态", "保修状态", "Warranty", "Warranty Status"]) || firstMatch(text, [
+        /(?:保内|保外|质保内|保修期内|过保|超保|under warranty|out of warranty)/i
       ]);
       if (/质保内|保修期内|under warranty/i.test(extracted.warrantyStatus)) {
         extracted.warrantyStatus = "保内";
@@ -1227,9 +1409,10 @@ SN：SN202605270018
         extracted.warrantyStatus = detectWarranty(text);
       }
 
-      extracted.orderType = firstMatch(text, [
-        /(?:建单需求|单据类型|售后类型|需求)\s*[:：]\s*(发货单|维修单|退件单|换机单)/i
-      ]) || detectOrderType(text);
+      extracted.orderType = valueByLabels(text, ["建单需求", "单据类型", "售后类型", "需求", "Order Type", "Service Type"]) || detectOrderType(text);
+      if (!["发货单", "维修单", "退件单", "换机单"].includes(extracted.orderType)) {
+        extracted.orderType = detectOrderType(extracted.orderType) || detectOrderType(text);
+      }
 
       const filled = [];
       Object.entries(extracted).forEach(([id, value]) => {
@@ -1284,6 +1467,15 @@ SN：SN202605270018
       showToast(`已复制字段：${label}`);
     }
 
+    async function copyAllOrderInfo() {
+      const result = validateForm();
+      const content = getCleanedRows()
+        .map((row) => `${row.label}：${row.value}`)
+        .join("\n");
+      await copyText(content);
+      showToast(result.isValid ? "全部建单信息已复制。" : "已复制全部信息，但仍有缺失字段或规则提示。");
+    }
+
     function buildExportObject() {
       return getCleanedRows().reduce((result, row) => {
         result[row.label] = row.value;
@@ -1293,6 +1485,14 @@ SN：SN202605270018
 
     function escapeCsv(value) {
       return `"${String(value || "").replace(/"/g, '""')}"`;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
 
     function downloadFile(filename, content, mimeType) {
@@ -1314,6 +1514,16 @@ SN：SN202605270018
         const content = JSON.stringify(buildExportObject(), null, 2);
         downloadFile(`售后物流建单清洗数据-${timestamp}.json`, content, "application/json;charset=utf-8");
         showToast("已导出 JSON 清洗数据。");
+        return;
+      }
+
+      if (format === "excel") {
+        const tableRows = getCleanedRows()
+          .map((row) => `<tr><td>${escapeHtml(row.section)}</td><td>${escapeHtml(row.label)}</td><td>${escapeHtml(row.value)}</td></tr>`)
+          .join("");
+        const content = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><table border="1"><thead><tr><th>模块</th><th>字段</th><th>清洗后数据</th></tr></thead><tbody>${tableRows}</tbody></table></body></html>`;
+        downloadFile(`售后物流建单清洗数据-${timestamp}.xls`, content, "application/vnd.ms-excel;charset=utf-8");
+        showToast("已导出 Excel 文件。");
         return;
       }
 
@@ -1345,8 +1555,10 @@ SN：SN202605270018
       const result = validateForm();
       showToast(result.isValid ? "校验通过，所有必填项已完成。" : "校验未通过，请查看红框字段。");
     });
+    document.getElementById("copyAllBtn").addEventListener("click", copyAllOrderInfo);
     document.getElementById("exportJsonBtn").addEventListener("click", () => exportCleanedData("json"));
     document.getElementById("exportCsvBtn").addEventListener("click", () => exportCleanedData("csv"));
+    document.getElementById("exportExcelBtn").addEventListener("click", () => exportCleanedData("excel"));
     document.getElementById("apiBtn").addEventListener("click", createOrderByAPI);
     document.getElementById("loadMockBtn").addEventListener("click", loadMockData);
     document.getElementById("clearBtn").addEventListener("click", clearForm);
