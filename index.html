@@ -106,6 +106,30 @@
       opacity: 0.92;
     }
 
+    .case-number-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      color: inherit;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .case-number-value {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.1);
+      color: #1d4ed8;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
     .status-banner.complete {
       border-color: rgba(15, 118, 110, 0.32);
       background: var(--success-bg);
@@ -701,6 +725,7 @@
       <div class="status-content">
         <strong id="statusText">仍有 0 个必填项未完成</strong>
         <p id="missingDetail" class="missing-detail">当前缺少：无</p>
+        <p class="case-number-line">当前建单编号：<span id="caseNoText" class="case-number-value">待生成</span></p>
       </div>
       <span class="hint">带 <span class="required-mark">*</span> 的字段为必填；红框表示需要补充或格式错误。</span>
     </section>
@@ -1131,6 +1156,7 @@ SN：SN202605270018
     const statusBanner = document.getElementById("statusBanner");
     const statusText = document.getElementById("statusText");
     const missingDetail = document.getElementById("missingDetail");
+    const caseNoText = document.getElementById("caseNoText");
     const categoryMower = document.getElementById("categoryMower");
     const categoryPoolRobot = document.getElementById("categoryPoolRobot");
     const productMapHint = document.getElementById("productMapHint");
@@ -1143,9 +1169,11 @@ SN：SN202605270018
     const extractNotices = document.getElementById("extractNotices");
     const toast = document.getElementById("toast");
     let toastTimer;
+    let currentCaseNo = "";
 
     const logisticsFieldIds = ["country", "city", "address", "postalCode", "phone"];
     const archiveStorageKey = "afterSalesOrderArchives:v1";
+    const caseCounterStorageKey = "afterSalesOrderCaseCounter:v1";
 
     const productMappings = [
       { name: "Luba mini 2 Series", model: "Lubamini2", category: "Mower" },
@@ -1164,6 +1192,7 @@ SN：SN202605270018
     ];
 
     const outputFieldOrder = [
+      { section: "系统信息", id: "caseNo", label: "建单编号", system: true },
       { section: "客户信息", id: "contactName", label: "联系人姓名" },
       { section: "客户信息", id: "phone", label: "联系电话" },
       { section: "客户信息", id: "email", label: "电子邮箱" },
@@ -1225,7 +1254,41 @@ SN：SN202605270018
       return fields[id] ? fields[id].value.trim() : "";
     }
 
-    function loadMockData() {
+    function padNumber(value, length) {
+      return String(value).padStart(length, "0");
+    }
+
+    function getDateKey(date = new Date()) {
+      return `${date.getFullYear()}${padNumber(date.getMonth() + 1, 2)}${padNumber(date.getDate(), 2)}`;
+    }
+
+    function generateCaseNo() {
+      const dateKey = getDateKey();
+      try {
+        const counters = JSON.parse(localStorage.getItem(caseCounterStorageKey) || "{}");
+        const nextNumber = Number(counters[dateKey] || 0) + 1;
+        counters[dateKey] = nextNumber;
+        localStorage.setItem(caseCounterStorageKey, JSON.stringify(counters));
+        return `AS-${dateKey}-${padNumber(nextNumber, 4)}`;
+      } catch (error) {
+        console.warn("生成建单编号失败，使用时间戳兜底：", error);
+        return `AS-${dateKey}-${Date.now().toString().slice(-6)}`;
+      }
+    }
+
+    function setCurrentCaseNo(caseNo) {
+      currentCaseNo = caseNo || generateCaseNo();
+      caseNoText.textContent = currentCaseNo;
+    }
+
+    function startNewCaseNo() {
+      setCurrentCaseNo(generateCaseNo());
+    }
+
+    function loadMockData(options = {}) {
+      if (options.newCaseNo) {
+        startNewCaseNo();
+      }
       Object.keys(mockData).forEach((id) => setValue(id, mockData[id]));
       rawInput.value = mockRawText;
       normalizePhone();
@@ -1240,6 +1303,7 @@ SN：SN202605270018
       });
       rawInput.value = "";
       extractNotices.innerHTML = "";
+      startNewCaseNo();
       populateProductModelOptions("");
       syncCategoryChecks();
       productMapHint.textContent = "选择产品型号后会自动带出产品类别和产品名称。";
@@ -1268,7 +1332,9 @@ SN：SN202605270018
     function getCleanedRows() {
       return outputFieldOrder.map((item) => ({
         ...item,
-        value: cleanFieldValue(item.id, getValue(item.id))
+        value: item.system && item.id === "caseNo"
+          ? currentCaseNo
+          : cleanFieldValue(item.id, getValue(item.id))
       }));
     }
 
@@ -1811,10 +1877,12 @@ SN：SN202605270018
       const values = Object.fromEntries(
         Object.entries(fields).map(([id, field]) => [id, cleanFieldValue(id, field.value)])
       );
+      values.caseNo = currentCaseNo;
       return {
-        id: `archive-${Date.now()}`,
+        id: `${currentCaseNo}-${Date.now()}`,
+        caseNo: currentCaseNo,
         createdAt: new Date().toISOString(),
-        title: values.contactName || values.customer || values.machineSn || "未命名客户",
+        title: values.contactName || values.customer || values.machineSn || currentCaseNo || "未命名客户",
         rawInput: rawInput.value.trim(),
         values,
         cleanedRows: getCleanedRows()
@@ -1846,6 +1914,7 @@ SN：SN202605270018
         showToast("未找到该留档记录。");
         return;
       }
+      setCurrentCaseNo(record.caseNo || record.values?.caseNo || generateCaseNo());
       Object.entries(record.values || {}).forEach(([id, value]) => setValue(id, value));
       rawInput.value = record.rawInput || "";
       refreshAll();
@@ -1880,13 +1949,13 @@ SN：SN202605270018
         item.className = "archive-item";
         item.innerHTML = `
           <div class="archive-title">
-            <strong>${escapeHtml(record.title || "未命名客户")}</strong>
+            <strong>${escapeHtml(record.caseNo || values.caseNo || "无编号")} · ${escapeHtml(record.title || "未命名客户")}</strong>
             <span>${escapeHtml(formatArchiveTime(record.createdAt))}</span>
           </div>
           <div class="archive-meta">
             <div>建单需求：${escapeHtml(values.orderType || "未填写")} / 质保：${escapeHtml(values.warrantyStatus || "未填写")}</div>
             <div>型号：${escapeHtml(values.productModel || "未填写")} / SN：${escapeHtml(values.machineSn || "未填写")}</div>
-            <div>电话：${escapeHtml(values.phone || "未填写")}</div>
+            <div>客服：${escapeHtml(values.supportAgent || "未填写")} / 电话：${escapeHtml(values.phone || "未填写")}</div>
           </div>
         `;
 
@@ -2032,11 +2101,12 @@ SN：SN202605270018
     document.getElementById("exportArchiveBtn").addEventListener("click", exportArchiveRecords);
     document.getElementById("clearArchiveBtn").addEventListener("click", clearArchiveRecords);
     document.getElementById("apiBtn").addEventListener("click", createOrderByAPI);
-    document.getElementById("loadMockBtn").addEventListener("click", loadMockData);
+    document.getElementById("loadMockBtn").addEventListener("click", () => loadMockData({ newCaseNo: true }));
     document.getElementById("clearBtn").addEventListener("click", clearForm);
 
     populateProductModelOptions("");
     syncCategoryChecks();
+    startNewCaseNo();
     loadMockData();
     renderArchiveList();
   </script>
