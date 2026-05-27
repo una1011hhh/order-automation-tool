@@ -251,6 +251,55 @@
       display: block;
     }
 
+    .category-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .category-option {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: #1f2937;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease,
+        box-shadow 0.18s ease;
+    }
+
+    .category-option:has(input:checked) {
+      border-color: rgba(37, 99, 235, 0.72);
+      background: #eff6ff;
+      box-shadow: inset 3px 0 0 #2563eb;
+    }
+
+    .field:has(#productCategory.is-invalid) .category-option {
+      border-color: var(--danger);
+      background: var(--danger-bg);
+    }
+
+    .category-option input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--primary);
+    }
+
+    .product-map-hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
     .field.logistics-focus input,
     .field.logistics-focus textarea {
       border-color: rgba(37, 99, 235, 0.62);
@@ -657,12 +706,25 @@
             <div class="form-grid">
               <div class="field">
                 <label for="productCategory">产品类别 <span class="required-mark">*</span></label>
-                <input id="productCategory" data-required="true" data-label="产品类别" type="text" />
+                <input id="productCategory" data-required="true" data-label="产品类别" type="hidden" />
+                <div class="category-options" role="group" aria-label="产品类别">
+                  <label class="category-option">
+                    <input id="categoryMower" type="checkbox" value="Mower" />
+                    Mower
+                  </label>
+                  <label class="category-option">
+                    <input id="categoryPoolRobot" type="checkbox" value="Pool Robot" />
+                    Pool Robot
+                  </label>
+                </div>
                 <div class="field-error"></div>
               </div>
               <div class="field">
                 <label for="productModel">产品型号 <span class="required-mark">*</span></label>
-                <input id="productModel" data-required="true" data-label="产品型号" type="text" />
+                <select id="productModel" data-required="true" data-label="产品型号">
+                  <option value="">请选择产品型号</option>
+                </select>
+                <div id="productMapHint" class="product-map-hint">选择产品型号后会自动带出产品类别和产品名称。</div>
                 <div class="field-error"></div>
               </div>
               <div class="field">
@@ -928,9 +990,9 @@
       postalCode: "201203",
       repairSite: "华东寄修中心",
       supportAgent: "客服-Amy",
-      productCategory: "智能清洁设备",
-      productModel: "SC-900 Pro",
-      productName: "商用智能清洁机器人",
+      productCategory: "Mower",
+      productModel: "Lubamini2",
+      productName: "Luba mini 2 Series",
       machineSn: "SN202605270018",
       deviceArchive: "DA-2026-0527-0018",
       feedback: "设备开机后提示主刷异常，重启后仍无法恢复，客户申请换机处理。",
@@ -964,8 +1026,8 @@
 城市：上海
 地址：浦东新区张江高科技园区晨晖路 88 号 5 号楼 1203 室
 邮编：201203
-产品型号：SC-900 Pro
-产品名称：商用智能清洁机器人
+产品型号：Lubamini2
+产品名称：Luba mini 2 Series
 SN：SN202605270018
 订单号：SO202603180438
 问题描述：设备开机后提示主刷异常，重启后仍无法恢复，客户申请换机处理。
@@ -977,6 +1039,9 @@ SN：SN202605270018
     const statusBanner = document.getElementById("statusBanner");
     const statusText = document.getElementById("statusText");
     const missingDetail = document.getElementById("missingDetail");
+    const categoryMower = document.getElementById("categoryMower");
+    const categoryPoolRobot = document.getElementById("categoryPoolRobot");
+    const productMapHint = document.getElementById("productMapHint");
     const logisticsPanel = document.getElementById("logisticsPanel");
     const logisticsAddressChecklist = document.getElementById("logisticsAddressChecklist");
     const orderNoRequiredMark = document.getElementById("orderNoRequiredMark");
@@ -986,6 +1051,22 @@ SN：SN202605270018
     let toastTimer;
 
     const logisticsFieldIds = ["country", "city", "address", "postalCode", "phone"];
+
+    const productMappings = [
+      { name: "Luba mini 2 Series", model: "Lubamini2", category: "Mower" },
+      { name: "Yuka Mini 2 Series", model: "YukaMini2", category: "Mower" },
+      { name: "Luba3 Series", model: "Luba3", category: "Mower" },
+      { name: "Refurbishment", model: "refurbishment-01", category: "Mower" },
+      { name: "Accessory", model: "accessory-01", category: "Mower" },
+      { name: "Yuka 2025 Series", model: "yuka2025", category: "Mower" },
+      { name: "SPINO E1 Series", model: "SE1", category: "Pool Robot" },
+      { name: "Luba2 AWD X Series", model: "luba2x", category: "Mower" },
+      { name: "Yuka Mini Series", model: "yukamini", category: "Mower" },
+      { name: "Yuka 2024 Series", model: "yuka", category: "Mower" },
+      { name: "Luba2 Series", model: "luba2", category: "Mower" },
+      { name: "Luba1 Series", model: "luba1", category: "Mower" },
+      { name: "Luba mini Series", model: "MM01", category: "Mower" }
+    ];
 
     const outputFieldOrder = [
       { section: "客户信息", id: "contactName", label: "联系人姓名" },
@@ -1029,7 +1110,19 @@ SN：SN202605270018
       if (!fields[id] || value === undefined || value === null || value === "") {
         return false;
       }
-      fields[id].value = String(value).trim();
+      const cleaned = String(value).trim();
+      if (id === "productCategory" && ["Mower", "Pool Robot"].includes(cleaned)) {
+        setProductCategory(cleaned);
+        return true;
+      }
+      if (id === "productModel" || id === "productName") {
+        const mapping = findProductMapping(cleaned);
+        if (mapping) {
+          applyProductMapping(mapping);
+          return true;
+        }
+      }
+      fields[id].value = cleaned;
       return true;
     }
 
@@ -1052,6 +1145,9 @@ SN：SN202605270018
       });
       rawInput.value = "";
       extractNotices.innerHTML = "";
+      populateProductModelOptions("");
+      syncCategoryChecks();
+      productMapHint.textContent = "选择产品型号后会自动带出产品类别和产品名称。";
       refreshAll();
       showToast("表单已清空。");
     }
@@ -1079,6 +1175,105 @@ SN：SN202605270018
         ...item,
         value: cleanFieldValue(item.id, getValue(item.id))
       }));
+    }
+
+    function populateProductModelOptions(category = "") {
+      const currentValue = getValue("productModel");
+      fields.productModel.innerHTML = '<option value="">请选择产品型号</option>';
+      productMappings
+        .filter((item) => !category || item.category === category)
+        .forEach((item) => {
+          const option = document.createElement("option");
+          option.value = item.model;
+          option.textContent = `${item.name} / ${item.model} / ${item.category}`;
+          option.dataset.category = item.category;
+          option.dataset.name = item.name;
+          fields.productModel.appendChild(option);
+        });
+
+      if (currentValue && productMappings.some((item) => item.model === currentValue && (!category || item.category === category))) {
+        fields.productModel.value = currentValue;
+      }
+    }
+
+    function syncCategoryChecks() {
+      const category = getValue("productCategory");
+      categoryMower.checked = category === "Mower";
+      categoryPoolRobot.checked = category === "Pool Robot";
+    }
+
+    function setProductCategory(category) {
+      fields.productCategory.value = category;
+      syncCategoryChecks();
+      populateProductModelOptions(category);
+    }
+
+    function normalizeProductText(value) {
+      return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    function findProductMapping(value) {
+      const normalized = normalizeProductText(value);
+      if (!normalized) return null;
+      return productMappings.find((item) =>
+        normalizeProductText(item.model) === normalized ||
+        normalizeProductText(item.name) === normalized
+      ) || productMappings.find((item) =>
+        normalizeProductText(item.model).includes(normalized) ||
+        normalizeProductText(item.name).includes(normalized) ||
+        normalized.includes(normalizeProductText(item.model)) ||
+        normalized.includes(normalizeProductText(item.name))
+      ) || null;
+    }
+
+    function findProductMappingInText(text) {
+      return productMappings.find((item) => {
+        const namePattern = new RegExp(escapeRegExp(item.name).replace(/\s+/g, "\\s+"), "i");
+        const modelPattern = new RegExp(`\\b${escapeRegExp(item.model)}\\b`, "i");
+        return namePattern.test(text) || modelPattern.test(text);
+      }) || null;
+    }
+
+    function applyProductMapping(mapping) {
+      if (!mapping) return false;
+      fields.productCategory.value = mapping.category;
+      populateProductModelOptions(mapping.category);
+      fields.productModel.value = mapping.model;
+      fields.productName.value = mapping.name;
+      syncCategoryChecks();
+      productMapHint.textContent = `已匹配：${mapping.name} / ${mapping.model} / ${mapping.category}`;
+      return true;
+    }
+
+    function handleCategorySelection(category, checked) {
+      if (!checked) {
+        fields.productCategory.value = "";
+        fields.productModel.value = "";
+        syncCategoryChecks();
+        populateProductModelOptions("");
+        productMapHint.textContent = "选择产品型号后会自动带出产品类别和产品名称。";
+        refreshAll();
+        return;
+      }
+
+      setProductCategory(category);
+      const selectedMapping = productMappings.find((item) => item.model === getValue("productModel"));
+      if (selectedMapping && selectedMapping.category !== category) {
+        fields.productModel.value = "";
+        fields.productName.value = "";
+      }
+      productMapHint.textContent = `已筛选 ${category} 类别下的产品型号。`;
+      refreshAll();
+    }
+
+    function handleProductModelChange() {
+      const mapping = productMappings.find((item) => item.model === getValue("productModel"));
+      if (mapping) {
+        applyProductMapping(mapping);
+      } else {
+        productMapHint.textContent = "选择产品型号后会自动带出产品类别和产品名称。";
+      }
+      refreshAll();
     }
 
     function getUniqueValues(values) {
@@ -1382,6 +1577,7 @@ SN：SN202605270018
         postalCode: valueByLabels(text, ["邮政编码", "邮编", "邮码", "Zip", "Zip Code", "Postal Code", "Postcode"]) || firstMatch(text, [
           /\b([A-Z]\d[A-Z]\s?\d[A-Z]\d|\d{5}(?:-\d{4})?|\d{6})\b/i
         ]),
+        productCategory: valueByLabels(text, ["产品类别", "类别", "Category", "Product Category"]),
         productModel: valueByLabels(text, ["产品型号", "型号", "Model", "Product Model"]) || firstMatch(text, [
           /(?:型号|model)\s*(?:是|为|:)?\s*([A-Z0-9][A-Z0-9\-_.\s]{1,40})/i
         ]),
@@ -1412,6 +1608,19 @@ SN：SN202605270018
       extracted.orderType = valueByLabels(text, ["建单需求", "单据类型", "售后类型", "需求", "Order Type", "Service Type"]) || detectOrderType(text);
       if (!["发货单", "维修单", "退件单", "换机单"].includes(extracted.orderType)) {
         extracted.orderType = detectOrderType(extracted.orderType) || detectOrderType(text);
+      }
+
+      const productMapping = findProductMapping(extracted.productModel) ||
+        findProductMapping(extracted.productName) ||
+        findProductMappingInText(text);
+      if (productMapping) {
+        extracted.productCategory = productMapping.category;
+        extracted.productModel = productMapping.model;
+        extracted.productName = productMapping.name;
+      } else if (/pool\s*robot|泳池|泳池机器人/i.test(extracted.productCategory)) {
+        extracted.productCategory = "Pool Robot";
+      } else if (/mower|割草|割草机/i.test(extracted.productCategory)) {
+        extracted.productCategory = "Mower";
       }
 
       const filled = [];
@@ -1550,6 +1759,10 @@ SN：SN202605270018
       refreshAll();
     });
 
+    categoryMower.addEventListener("change", () => handleCategorySelection("Mower", categoryMower.checked));
+    categoryPoolRobot.addEventListener("change", () => handleCategorySelection("Pool Robot", categoryPoolRobot.checked));
+    fields.productModel.addEventListener("change", handleProductModelChange);
+
     document.getElementById("extractBtn").addEventListener("click", extractInfoFromText);
     document.getElementById("validateBtn").addEventListener("click", () => {
       const result = validateForm();
@@ -1563,6 +1776,8 @@ SN：SN202605270018
     document.getElementById("loadMockBtn").addEventListener("click", loadMockData);
     document.getElementById("clearBtn").addEventListener("click", clearForm);
 
+    populateProductModelOptions("");
+    syncCategoryChecks();
     loadMockData();
   </script>
 </body>
