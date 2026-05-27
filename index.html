@@ -1653,6 +1653,16 @@ SN：SN202605270018
       return match && match[1] ? match[1].replace(/[，,。；;]+$/g, "").trim() : "";
     }
 
+    function hasLabeledLine(text, labels) {
+      const labelPattern = labels
+        .slice()
+        .sort((a, b) => b.length - a.length)
+        .map(escapeRegExp)
+        .join("|");
+      const pattern = new RegExp(`(?:^|\\n)[^\\S\\n]*(?:${labelPattern})(?=[^\\S\\n]*[:#：-]|[^\\S\\n]+|$)`, "i");
+      return pattern.test(text);
+    }
+
     function multilineValueByLabels(text, labels) {
       const labelPattern = labels
         .slice()
@@ -1688,10 +1698,15 @@ SN：SN202605270018
     }
 
     function detectAddress(text) {
-      const labeled = valueByLabels(text, ["详细地址", "收货地址", "寄送地址", "地址", "Address", "Ship to", "Shipping Address"]);
+      const addressLabels = ["详细地址", "收货地址", "寄送地址", "地址", "Address", "Ship to", "Shipping Address"];
+      const labeled = valueByLabels(text, addressLabels);
       if (labeled) return labeled;
+      if (hasLabeledLine(text, addressLabels)) return "";
+
+      const excludedFieldLine = /^(产品型号|型号|产品名称|品名|SN|S\/N|机器SN|设备SN|序列号|订单号|原订单号|发票号|邮编|邮政编码|电话|手机|邮箱|电子邮箱|国家|国家\/地区|省份|省|城市|市)\s*[:：#-]/i;
       const line = text.split("\n").find((item) =>
-        /(路|街|道|号|室|栋|Road|Rd\.|Street|St\.|Ave|Avenue|Building|Floor|Room)/i.test(item)
+        !excludedFieldLine.test(item.trim()) &&
+        /(路|街|道|号楼|号院|室|栋|Road|Rd\.|Street|St\.|Ave|Avenue|Building|Floor|Room)/i.test(item)
       );
       return line ? line.replace(/^(地址|Address)\s*[:：-]?\s*/i, "").trim() : "";
     }
