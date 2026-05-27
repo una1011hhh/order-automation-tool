@@ -325,6 +325,14 @@
       min-height: 250px;
     }
 
+    .top-ai-card {
+      margin-bottom: 18px;
+    }
+
+    .top-ai-card .ai-textarea {
+      min-height: 170px;
+    }
+
     .export-tip {
       margin: 0 0 12px;
       color: var(--muted);
@@ -629,6 +637,21 @@
       <span class="hint">带 <span class="required-mark">*</span> 的字段为必填；红框表示需要补充或格式错误。</span>
     </section>
 
+    <section class="card top-ai-card">
+      <div class="card-header">
+        <h2>五、客户原始内容输入</h2>
+        <span class="tag">优先输入 / AI 自动提取区</span>
+      </div>
+      <div class="card-body">
+        <textarea id="rawInput" class="ai-textarea" placeholder="先粘贴客户邮件、工单、聊天记录或 CRM 内容，再点击 AI 提取信息自动回填下方建单字段..."></textarea>
+        <div class="button-row">
+          <button type="button" class="btn-primary" id="extractBtn">AI 提取信息</button>
+          <button type="button" class="btn-secondary" id="validateBtn">校验必填项</button>
+        </div>
+        <ul id="extractNotices" class="notice-list"></ul>
+      </div>
+    </section>
+
     <div class="layout">
       <main class="main-grid">
         <section class="card">
@@ -899,21 +922,6 @@
       </main>
 
       <aside class="side-column">
-        <section class="card">
-          <div class="card-header">
-            <h2>五、客户原始内容输入</h2>
-            <span class="tag">AI 自动提取区</span>
-          </div>
-          <div class="card-body">
-            <textarea id="rawInput" class="ai-textarea" placeholder="粘贴客户邮件、工单、聊天记录或 CRM 内容..."></textarea>
-            <div class="button-row">
-              <button type="button" class="btn-primary" id="extractBtn">AI 提取信息</button>
-              <button type="button" class="btn-secondary" id="validateBtn">校验必填项</button>
-            </div>
-            <ul id="extractNotices" class="notice-list"></ul>
-          </div>
-        </section>
-
         <section class="card">
           <div class="card-header">
             <h2>六、结果输出区</h2>
