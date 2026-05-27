@@ -246,13 +246,6 @@
       min-height: 250px;
     }
 
-    .output-textarea {
-      min-height: 280px;
-      background: #f8fafc;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      font-size: 13px;
-    }
-
     .export-tip {
       margin: 0 0 12px;
       color: var(--muted);
@@ -1094,10 +1087,6 @@ SN：SN202605270018
     function refreshAll() {
       validateForm();
       updateOutput();
-    }
-
-    function buildOrderText() {
-      return getCleanedRows().map((row) => `${row.label}：${row.value}`).join("\n");
     }
 
     function updateOutput() {
