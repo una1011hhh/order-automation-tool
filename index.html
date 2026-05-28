@@ -1676,7 +1676,7 @@ SN：SN202605270018
         .join("|");
       const boundaryLabels = [
         "姓名", "联系人", "收件人", "电话", "手机", "邮箱", "电子邮箱", "国家",
-        "国家/地区", "省", "省份", "城市", "市", "地址", "收货地址", "邮编",
+        "国家/地区", "省", "省份", "城市", "市", "地址", "客户地址", "收货地址", "邮编",
         "邮政编码", "SN", "机器SN", "设备SN", "序列号", "产品型号", "型号",
         "产品名称", "订单号", "原订单号", "建单需求", "单据类型", "质保状态",
         "保修状态", "购买渠道", "发票号"
@@ -1699,19 +1699,20 @@ SN：SN202605270018
       if (/法国|France|FR\b/i.test(text)) return "法国";
       if (/加拿大|Canada|CA\b/i.test(text)) return "加拿大";
       if (/澳大利亚|Australia|AU\b/i.test(text)) return "澳大利亚";
+      if (/匈牙利|Hungary|HU\b/i.test(text)) return "匈牙利";
       return "";
     }
 
     function detectAddress(text) {
-      const addressLabels = ["详细地址", "收货地址", "寄送地址", "地址", "Address", "Ship to", "Shipping Address"];
+      const addressLabels = ["详细地址", "客户地址", "收货地址", "寄送地址", "地址", "Address", "Customer Address", "Ship to", "Shipping Address"];
       const labeled = valueByLabels(text, addressLabels);
       if (labeled) return labeled;
       if (hasLabeledLine(text, addressLabels)) return "";
 
-      const excludedFieldLine = /^(产品型号|型号|产品名称|品名|SN|S\/N|机器SN|设备SN|序列号|订单号|原订单号|发票号|邮编|邮政编码|电话|手机|邮箱|电子邮箱|国家|国家\/地区|省份|省|城市|市)\s*[:：#-]/i;
+      const excludedFieldLine = /^(产品型号|型号|产品名称|品名|SN|S\/N|机器SN|设备SN|序列号|订单号|原订单号|发票号|邮编|邮政编码|电话|手机|邮箱|电子邮箱|国家|国家\/地区|省份|省|城市|市|处理需求|退回产品SKU|补发SKU|产品SKU)\s*[:：#-]/i;
       const line = text.split("\n").find((item) =>
         !excludedFieldLine.test(item.trim()) &&
-        /(路|街|道|号楼|号院|室|栋|Road|Rd\.|Street|St\.|Ave|Avenue|Building|Floor|Room)/i.test(item)
+        /(路|街|道|号楼|号院|室|栋|Road|Rd\.|Street|St\.|Ave|Avenue|Building|Floor|Room|utca|út|ut|tér|körút)/i.test(item)
       );
       return line ? line.replace(/^(地址|Address)\s*[:：-]?\s*/i, "").trim() : "";
     }
@@ -1771,6 +1772,11 @@ SN：SN202605270018
       if (explicit) return explicit;
 
       const source = `${text || ""} ${city || ""} ${state || ""}`;
+      if (/Budapest|匈牙利|Hungary|utca|út|körút/i.test(source)) {
+        const hungaryPostal = source.match(/\b([1-9]\d{3})\b/);
+        if (hungaryPostal) return hungaryPostal[1];
+      }
+
       const postalByRegion = [
         ["张江", "201203"], ["浦东", "200120"], ["上海", "200000"],
         ["北京", "100000"], ["广州", "510000"], ["深圳", "518000"],
@@ -1792,6 +1798,8 @@ SN：SN202605270018
       if (!extracted.country && region.country) extracted.country = region.country;
       if (!extracted.state && region.state) extracted.state = region.state;
       if (!extracted.city && region.city) extracted.city = region.city;
+      if (!extracted.country && /Budapest|Hungary|匈牙利/i.test(source)) extracted.country = "匈牙利";
+      if (!extracted.city && /Budapest/i.test(source)) extracted.city = "Budapest";
       if (!extracted.postalCode) {
         extracted.postalCode = inferPostalCode(source, extracted.city, extracted.state);
       }
@@ -1876,7 +1884,7 @@ SN：SN202605270018
         state: valueByLabels(text, ["省", "省份", "州", "State", "Province"]),
         city: valueByLabels(text, ["城市", "市", "City"]),
         address: detectAddress(text),
-        postalCode: valueByLabels(text, ["邮政编码", "邮编", "邮码", "Zip", "Zip Code", "Postal Code", "Postcode"]) || firstMatch(text, [
+        postalCode: valueByLabels(text, ["邮政编码", "邮编", "邮码", "Zip", "Zip Code", "Postal Code", "Postcode", "Postal"]) || firstMatch(text, [
           /\b([A-Z]\d[A-Z]\s?\d[A-Z]\d|\d{5}(?:-\d{4})?|\d{6})\b/i
         ]),
         productCategory: valueByLabels(text, ["产品类别", "类别", "Category", "Product Category"]),
