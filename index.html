@@ -1833,6 +1833,29 @@ SN：SN202605270018
         .trim();
     }
 
+    function trimNarrativeContent(value) {
+      let text = String(value || "").trim();
+      if (!text) return "";
+
+      const inlineBoundaryPatterns = [
+        /[\s\n]*[-_=—]{4,}\s*(客户信息|客户资料|收件信息|联系人信息|售后信息|发货信息|物流信息|订单信息)[\s\S]*$/i,
+        /\n\s*(客户信息|客户资料|收件信息|联系人信息|售后信息|发货信息|物流信息|订单信息)(?=\s|[:：#-]|$)[\s\S]*$/i,
+        /\n\s*(建单需求|处理需求|产品SKU|产品 SKU|退回产品SKU|退回产品 SKU|补发SKU|补发 SKU|发货SKU|发货 SKU)(?=\s|[:：#-]|$)[\s\S]*$/i,
+        /\n\s*(订单号|原订单号|发票号|购买日期|国家|国家\/地区|客户地址|收货地址|详细地址|电话|手机|邮箱|电子邮箱|SN|S\/N|机器SN|设备SN|产品型号|型号|产品名称|备注)(?=\s|[:：#-]|$)[\s\S]*$/i
+      ];
+
+      inlineBoundaryPatterns.forEach((pattern) => {
+        text = text.replace(pattern, "");
+      });
+
+      return text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .join("\n")
+        .trim();
+    }
+
     function extractNarrativeValue(text, labels) {
       const sourceLines = String(text || "").split("\n");
       const labelPattern = labels
@@ -1857,7 +1880,7 @@ SN：SN202605270018
           if (cleaned) collected.push(cleaned);
         }
 
-        return collected.join("\n").trim();
+        return trimNarrativeContent(collected.join("\n"));
       }
 
       return "";
