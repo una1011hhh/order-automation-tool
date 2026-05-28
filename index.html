@@ -852,16 +852,6 @@
                   <iframe id="mapFrame" title="Google Maps 地址预览" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
               </div>
-              <div class="field">
-                <label for="repairSite">寄修网点 <span class="required-mark">*</span></label>
-                <input id="repairSite" data-required="true" data-label="寄修网点" type="text" />
-                <div class="field-error"></div>
-              </div>
-              <div class="field">
-                <label for="supportAgent">客服</label>
-                <input id="supportAgent" data-label="客服" type="text" />
-                <div class="field-error"></div>
-              </div>
             </div>
           </div>
         </section>
@@ -975,6 +965,16 @@
                   <option value="退件单">退件单</option>
                   <option value="换机单">换机单</option>
                 </select>
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="repairSite">寄修网点 <span class="required-mark">*</span></label>
+                <input id="repairSite" data-required="true" data-label="寄修网点" type="text" />
+                <div class="field-error"></div>
+              </div>
+              <div class="field">
+                <label for="supportAgent">受理客服</label>
+                <input id="supportAgent" data-label="受理客服" type="text" />
                 <div class="field-error"></div>
               </div>
               <div class="field">
@@ -1299,8 +1299,6 @@ SN：SN202605270018
       { section: "客户信息", id: "city", label: "城市" },
       { section: "客户信息", id: "address", label: "详细地址" },
       { section: "客户信息", id: "postalCode", label: "邮政编码" },
-      { section: "客户信息", id: "repairSite", label: "寄修网点" },
-      { section: "客户信息", id: "supportAgent", label: "客服" },
       { section: "产品信息", id: "productCategory", label: "产品类别" },
       { section: "产品信息", id: "productModel", label: "产品型号" },
       { section: "产品信息", id: "productName", label: "产品名称" },
@@ -1314,6 +1312,8 @@ SN：SN202605270018
       { section: "产品信息", id: "warrantyStatus", label: "质保状态" },
       { section: "产品信息", id: "remarks", label: "备注" },
       { section: "售后信息", id: "orderType", label: "建单需求" },
+      { section: "售后信息", id: "repairSite", label: "寄修网点" },
+      { section: "售后信息", id: "supportAgent", label: "受理客服" },
       { section: "售后信息", id: "productSku", label: "产品 SKU" },
       { section: "售后信息", id: "returnSku", label: "退回产品 SKU" },
       { section: "售后信息", id: "reshipSku", label: "补发 SKU" },
@@ -1818,6 +1818,51 @@ SN：SN202605270018
       return match && match[1] ? match[1].replace(/\s+/g, " ").replace(/[，,。；;]+$/g, "").trim() : "";
     }
 
+    function isNarrativeBoundaryLine(line) {
+      const value = String(line || "").trim();
+      if (!value) return false;
+      if (/^[-_=—]{4,}$/.test(value.replace(/\s+/g, ""))) return true;
+      const withoutSeparatorPrefix = value.replace(/^[-_=—\s]+/, "");
+      return /^(客户信息|客户资料|收件信息|联系人信息|售后信息|发货信息|物流信息|订单信息|建单需求|处理需求|产品SKU|产品 SKU|退回产品SKU|退回产品 SKU|补发SKU|补发 SKU|发货SKU|发货 SKU|订单号|原订单号|发票号|购买日期|国家|国家\/地区|客户地址|收货地址|详细地址|电话|手机|邮箱|电子邮箱|SN|S\/N|机器SN|设备SN|产品型号|型号|产品名称|备注)\b/i.test(withoutSeparatorPrefix);
+    }
+
+    function cleanNarrativeLine(line) {
+      return String(line || "")
+        .replace(/^[-_=—\s]+/, "")
+        .replace(/[-_=—\s]+$/, "")
+        .trim();
+    }
+
+    function extractNarrativeValue(text, labels) {
+      const sourceLines = String(text || "").split("\n");
+      const labelPattern = labels
+        .slice()
+        .sort((a, b) => b.length - a.length)
+        .map(escapeRegExp)
+        .join("|");
+      const labelRegex = new RegExp(`^\\s*(?:${labelPattern})(?=[^\\S\\n]*[:#：-]|[^\\S\\n]+|$)[^\\S\\n]*(?:[:#：-][^\\S\\n]*)?(.*)$`, "i");
+
+      for (let index = 0; index < sourceLines.length; index += 1) {
+        const match = sourceLines[index].match(labelRegex);
+        if (!match) continue;
+
+        const collected = [];
+        const sameLineValue = cleanNarrativeLine(match[1]);
+        if (sameLineValue) collected.push(sameLineValue);
+
+        for (let nextIndex = index + 1; nextIndex < sourceLines.length; nextIndex += 1) {
+          const line = sourceLines[nextIndex];
+          if (isNarrativeBoundaryLine(line)) break;
+          const cleaned = cleanNarrativeLine(line);
+          if (cleaned) collected.push(cleaned);
+        }
+
+        return collected.join("\n").trim();
+      }
+
+      return "";
+    }
+
     function detectCountry(text) {
       const labeled = valueByLabels(text, ["国家", "国家/地区", "地区", "Country", "Region"]);
       if (labeled) return labeled;
@@ -2080,10 +2125,17 @@ SN：SN202605270018
           /\b([A-Z]{1,4}\d{6,}[A-Z0-9\-_.]*)\b/i
         ]),
         orderNo: valueByLabels(text, ["原订单号", "订单号", "Order No.", "Order ID", "Original Order", "Order Number"]),
-        feedback: multilineValueByLabels(text, ["反馈内容", "客户反馈", "问题描述", "故障描述", "故障/问题描述", "Issue", "Problem", "Fault", "Description"])
+        feedback: extractNarrativeValue(text, [
+          "反馈内容", "客户反馈", "问题描述", "故障描述", "故障/问题描述",
+          "故障问题描述", "问题/故障描述", "故障/问题", "Issue", "Problem",
+          "Fault", "Description", "Problem Description", "Issue Description"
+        ])
       };
 
-      extracted.problemDescription = extracted.feedback || multilineValueByLabels(text, ["需要处理的问题", "异常现象", "Failure", "Symptom"]);
+      extracted.problemDescription = extracted.feedback || extractNarrativeValue(text, [
+        "故障/问题描述", "故障问题描述", "问题描述", "故障描述", "需要处理的问题",
+        "异常现象", "Failure", "Symptom", "Problem Description", "Issue Description"
+      ]);
       extracted.feedback = extracted.feedback || extracted.problemDescription;
       extracted.warrantyStatus = valueByLabels(text, ["质保状态", "保修状态", "Warranty", "Warranty Status"]) || firstMatch(text, [
         /(?:保内|保外|质保内|保修期内|过保|超保|under warranty|out of warranty)/i
@@ -2290,7 +2342,7 @@ SN：SN202605270018
           <div class="archive-meta">
             <div>建单需求：${escapeHtml(values.orderType || "未填写")} / 质保：${escapeHtml(values.warrantyStatus || "未填写")}</div>
             <div>型号：${escapeHtml(values.productModel || "未填写")} / SN：${escapeHtml(values.machineSn || "未填写")}</div>
-            <div>客服：${escapeHtml(values.supportAgent || "未填写")} / 电话：${escapeHtml(values.phone || "未填写")}</div>
+            <div>受理客服：${escapeHtml(values.supportAgent || "未填写")} / 电话：${escapeHtml(values.phone || "未填写")}</div>
           </div>
         `;
 
