@@ -553,6 +553,51 @@
       box-shadow: none;
     }
 
+    .map-preview {
+      margin-top: 10px;
+      border: 1px solid #dbe3ef;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    .map-preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      color: #374151;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .map-preview-header button {
+      min-height: 28px;
+      padding: 5px 9px;
+      font-size: 12px;
+      box-shadow: none;
+    }
+
+    .map-preview iframe {
+      display: block;
+      width: 100%;
+      height: 220px;
+      border: 0;
+      background: #e5e7eb;
+    }
+
+    .map-empty {
+      display: grid;
+      place-items: center;
+      min-height: 120px;
+      padding: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
     .button-row {
       display: flex;
       flex-wrap: wrap;
@@ -798,6 +843,14 @@
                 <label for="address">详细地址 <span class="required-mark">*</span></label>
                 <textarea id="address" data-required="true" data-label="详细地址"></textarea>
                 <div class="field-error"></div>
+                <div class="map-preview">
+                  <div class="map-preview-header">
+                    <span>Google Maps 地址辅助校验</span>
+                    <button type="button" class="btn-outline" id="openMapBtn">打开 Google Maps</button>
+                  </div>
+                  <div id="mapEmpty" class="map-empty">填写详细地址、城市、国家后，这里会显示 Google Maps 预览。</div>
+                  <iframe id="mapFrame" title="Google Maps 地址预览" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
               </div>
               <div class="field">
                 <label for="repairSite">寄修网点 <span class="required-mark">*</span></label>
@@ -1160,6 +1213,9 @@ SN：SN202605270018
     const categoryMower = document.getElementById("categoryMower");
     const categoryPoolRobot = document.getElementById("categoryPoolRobot");
     const productMapHint = document.getElementById("productMapHint");
+    const mapFrame = document.getElementById("mapFrame");
+    const mapEmpty = document.getElementById("mapEmpty");
+    const openMapBtn = document.getElementById("openMapBtn");
     const logisticsPanel = document.getElementById("logisticsPanel");
     const logisticsAddressChecklist = document.getElementById("logisticsAddressChecklist");
     const orderNoRequiredMark = document.getElementById("orderNoRequiredMark");
@@ -1631,6 +1687,38 @@ SN：SN202605270018
 
     function updateOutput() {
       renderCleanDataList();
+      updateMapPreview();
+    }
+
+    function buildMapQuery() {
+      return [getValue("address"), getValue("city"), getValue("state"), getValue("postalCode"), getValue("country")]
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    function updateMapPreview() {
+      const query = buildMapQuery();
+      if (!query) {
+        mapFrame.removeAttribute("src");
+        mapFrame.style.display = "none";
+        mapEmpty.style.display = "grid";
+        openMapBtn.disabled = true;
+        return;
+      }
+
+      mapFrame.src = `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+      mapFrame.style.display = "block";
+      mapEmpty.style.display = "none";
+      openMapBtn.disabled = false;
+    }
+
+    function openGoogleMaps() {
+      const query = buildMapQuery();
+      if (!query) {
+        showToast("请先填写详细地址、城市或国家。");
+        return;
+      }
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, "_blank", "noopener");
     }
 
     function renderCleanDataList() {
@@ -2334,6 +2422,7 @@ SN：SN202605270018
     categoryMower.addEventListener("change", () => handleCategorySelection("Mower", categoryMower.checked));
     categoryPoolRobot.addEventListener("change", () => handleCategorySelection("Pool Robot", categoryPoolRobot.checked));
     fields.productModel.addEventListener("change", handleProductModelChange);
+    openMapBtn.addEventListener("click", openGoogleMaps);
 
     document.getElementById("extractBtn").addEventListener("click", extractInfoFromText);
     document.getElementById("validateBtn").addEventListener("click", () => {
