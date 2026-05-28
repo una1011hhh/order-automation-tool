@@ -1191,6 +1191,47 @@ SN：SN202605270018
       { name: "Luba mini Series", model: "MM01", category: "Mower" }
     ];
 
+    const countryAliases = [
+      ["美国", /\b(United States|USA|U\.S\.A\.|US|U\.S\.)\b|美国/i],
+      ["加拿大", /\b(Canada|CA)\b|加拿大/i],
+      ["英国", /\b(United Kingdom|Great Britain|England|UK|U\.K\.)\b|英国/i],
+      ["德国", /\b(Germany|Deutschland|DE)\b|德国/i],
+      ["法国", /\b(France|FR)\b|法国/i],
+      ["意大利", /\b(Italy|Italia|IT)\b|意大利/i],
+      ["西班牙", /\b(Spain|España|ES)\b|西班牙/i],
+      ["葡萄牙", /\b(Portugal|PT)\b|葡萄牙/i],
+      ["荷兰", /\b(Netherlands|Holland|NL)\b|荷兰/i],
+      ["比利时", /\b(Belgium|BE)\b|比利时/i],
+      ["奥地利", /\b(Austria|AT)\b|奥地利/i],
+      ["瑞士", /\b(Switzerland|Swiss|CH)\b|瑞士/i],
+      ["瑞典", /\b(Sweden|SE)\b|瑞典/i],
+      ["挪威", /\b(Norway|NO)\b|挪威/i],
+      ["丹麦", /\b(Denmark|DK)\b|丹麦/i],
+      ["芬兰", /\b(Finland|FI)\b|芬兰/i],
+      ["爱尔兰", /\b(Ireland|IE)\b|爱尔兰/i],
+      ["波兰", /\b(Poland|PL)\b|波兰/i],
+      ["捷克", /\b(Czech Republic|Czechia|CZ)\b|捷克/i],
+      ["匈牙利", /\b(Hungary|HU)\b|匈牙利/i],
+      ["罗马尼亚", /\b(Romania|RO)\b|罗马尼亚/i],
+      ["希腊", /\b(Greece|GR)\b|希腊/i],
+      ["澳大利亚", /\b(Australia|AU)\b|澳大利亚/i],
+      ["新西兰", /\b(New Zealand|NZ)\b|新西兰/i],
+      ["日本", /\b(Japan|JP)\b|日本/i],
+      ["韩国", /\b(Korea|South Korea|KR)\b|韩国/i],
+      ["新加坡", /\b(Singapore|SG)\b|新加坡/i],
+      ["中国", /\b(China|CN)\b|中国/i]
+    ];
+
+    const overseasCityNames = [
+      "Budapest", "London", "Paris", "Berlin", "Munich", "Hamburg", "Frankfurt",
+      "Madrid", "Barcelona", "Rome", "Milan", "Amsterdam", "Rotterdam", "Brussels",
+      "Vienna", "Prague", "Warsaw", "Lisbon", "Dublin", "Stockholm", "Copenhagen",
+      "Oslo", "Helsinki", "Zurich", "Geneva", "Toronto", "Vancouver", "Montreal",
+      "New York", "Los Angeles", "San Francisco", "Chicago", "Seattle", "Miami",
+      "Dallas", "Houston", "Sydney", "Melbourne", "Brisbane", "Auckland", "Tokyo",
+      "Seoul", "Singapore"
+    ];
+
     const outputFieldOrder = [
       { section: "系统信息", id: "caseNo", label: "建单编号", system: true },
       { section: "客户信息", id: "contactName", label: "联系人姓名" },
@@ -1692,29 +1733,33 @@ SN：SN202605270018
     function detectCountry(text) {
       const labeled = valueByLabels(text, ["国家", "国家/地区", "地区", "Country", "Region"]);
       if (labeled) return labeled;
-      if (/中国|China|CN\b/i.test(text)) return "中国";
-      if (/美国|United States|USA|US\b/i.test(text)) return "美国";
-      if (/英国|United Kingdom|UK\b/i.test(text)) return "英国";
-      if (/德国|Germany|DE\b/i.test(text)) return "德国";
-      if (/法国|France|FR\b/i.test(text)) return "法国";
-      if (/加拿大|Canada|CA\b/i.test(text)) return "加拿大";
-      if (/澳大利亚|Australia|AU\b/i.test(text)) return "澳大利亚";
-      if (/匈牙利|Hungary|HU\b/i.test(text)) return "匈牙利";
-      return "";
+      const match = countryAliases.find(([, pattern]) => pattern.test(text));
+      return match ? match[0] : "";
     }
 
     function detectAddress(text) {
-      const addressLabels = ["详细地址", "客户地址", "收货地址", "寄送地址", "地址", "Address", "Customer Address", "Ship to", "Shipping Address"];
+      const addressLabels = [
+        "详细地址", "客户地址", "收货地址", "寄送地址", "地址",
+        "Address", "Customer Address", "Client Address", "Shipping Address",
+        "Ship to", "Ship To", "Delivery Address", "Street Address"
+      ];
       const labeled = valueByLabels(text, addressLabels);
       if (labeled) return labeled;
       if (hasLabeledLine(text, addressLabels)) return "";
 
-      const excludedFieldLine = /^(产品型号|型号|产品名称|品名|SN|S\/N|机器SN|设备SN|序列号|订单号|原订单号|发票号|邮编|邮政编码|电话|手机|邮箱|电子邮箱|国家|国家\/地区|省份|省|城市|市|处理需求|退回产品SKU|补发SKU|产品SKU)\s*[:：#-]/i;
+      const excludedFieldLine = /^(产品型号|型号|产品名称|品名|SN|S\/N|机器SN|设备SN|序列号|订单号|原订单号|发票号|邮编|邮政编码|Zip|Postal|Postcode|电话|手机|邮箱|电子邮箱|国家|国家\/地区|Country|Region|省份|省|State|Province|城市|市|City|处理需求|建单需求|退回产品SKU|补发SKU|产品SKU|SKU)\s*[:：#-]/i;
       const line = text.split("\n").find((item) =>
         !excludedFieldLine.test(item.trim()) &&
-        /(路|街|道|号楼|号院|室|栋|Road|Rd\.|Street|St\.|Ave|Avenue|Building|Floor|Room|utca|út|ut|tér|körút)/i.test(item)
+        isLikelyAddressLine(item)
       );
       return line ? line.replace(/^(地址|Address)\s*[:：-]?\s*/i, "").trim() : "";
+    }
+
+    function isLikelyAddressLine(value) {
+      const line = String(value || "").trim();
+      if (!line) return false;
+      if (/@/.test(line)) return false;
+      return /(\d+\s*[A-Za-z\u00C0-\u024F]|[A-Za-z\u00C0-\u024F]+\s+\d+|路|街|道|号楼|号院|室|栋|Road|Rd\.?|Street|St\.?|Avenue|Ave\.?|Boulevard|Blvd\.?|Lane|Ln\.?|Drive|Dr\.?|Court|Ct\.?|Way|Place|Pl\.?|Square|Sq\.?|Terrace|Ter\.?|Close|Crescent|Cres\.?|Circle|Cir\.?|Parkway|Pkwy\.?|Highway|Hwy\.?|Apartment|Apt\.?|Unit|Suite|Ste\.?|Flat|Floor|Room|Building|House|No\.?|Calle|Carrera|Avenida|Av\.?|Rua|Rue|Strasse|Straße|Weg|Via|Viale|Piazza|Ulica|ul\.?|Aleja|al\.?|ulitsa|Prospekt|utca|út|ut|tér|körút|bairro)/i.test(line);
     }
 
     function isLikelyPersonalName(value) {
@@ -1766,9 +1811,55 @@ SN：SN202605270018
       return {};
     }
 
+    function inferInternationalRegion(text) {
+      const source = String(text || "");
+      const country = detectCountry(source);
+      const stateMatch = source.match(/\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|IA|ID|IL|IN|KS|KY|LA|MA|MD|ME|MI|MN|MO|MS|MT|NC|ND|NE|NH|NJ|NM|NV|NY|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VA|VT|WA|WI|WV|WY|ON|QC|BC|AB|MB|SK|NS|NB|NL|PE|NT|NU|YT|NSW|VIC|QLD|WA|SA|TAS|ACT|NT)\b/);
+      let city = "";
+
+      const knownCity = overseasCityNames.find((name) => new RegExp(`\\b${escapeRegExp(name)}\\b`, "i").test(source));
+      if (knownCity) {
+        city = knownCity;
+      }
+
+      if (!city) {
+        const commaParts = source
+          .split(/\n|,/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .filter((item) => !isNonAddressMetadataLine(item));
+        const cityPart = commaParts.find((item) =>
+          /^[A-Za-z\u00C0-\u024F .'-]{2,}$/.test(item) &&
+          !countryAliases.some(([, pattern]) => pattern.test(item))
+        );
+        if (cityPart) {
+          city = cityPart.replace(/\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|IA|ID|IL|IN|KS|KY|LA|MA|MD|ME|MI|MN|MO|MS|MT|NC|ND|NE|NH|NJ|NM|NV|NY|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VA|VT|WA|WI|WV|WY|ON|QC|BC|AB|MB|SK|NS|NB|NL|PE|NT|NU|YT|NSW|VIC|QLD|WA|SA|TAS|ACT|NT)\b.*$/i, "").trim();
+        }
+      }
+
+      if (!city) {
+        const postalBeforeCity = source.match(/\b\d{4,5}\s+([A-Za-z\u00C0-\u024F .'-]{2,})\b/);
+        if (postalBeforeCity) city = postalBeforeCity[1].trim();
+      }
+
+      return {
+        country,
+        state: stateMatch ? stateMatch[1] : "",
+        city
+      };
+    }
+
+    function isNonAddressMetadataLine(value) {
+      return /^(姓名|联系人|客户|电话|手机|邮箱|电子邮箱|产品型号|型号|产品名称|SN|S\/N|订单号|建单需求|处理需求|SKU|产品SKU|退回产品SKU|补发SKU|国家|Country|邮编|Postal|Zip)\s*[:：#-]/i.test(String(value || "").trim());
+    }
+
     function inferPostalCode(text, city, state) {
       const explicit = valueByLabels(text, ["邮政编码", "邮编", "邮码", "Zip", "Zip Code", "Postal Code", "Postcode"]) ||
-        firstMatch(text, [/\b([A-Z]\d[A-Z]\s?\d[A-Z]\d|\d{5}(?:-\d{4})?|\d{6})\b/i]);
+        firstMatch(text, [
+          /\b([A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2})\b/i,
+          /\b([A-Z]\d[A-Z]\s?\d[A-Z]\d)\b/i,
+          /\b(\d{5}(?:-\d{4})?|\d{4}|\d{6})\b/i
+        ]);
       if (explicit) return explicit;
 
       const source = `${text || ""} ${city || ""} ${state || ""}`;
@@ -1798,8 +1889,12 @@ SN：SN202605270018
       if (!extracted.country && region.country) extracted.country = region.country;
       if (!extracted.state && region.state) extracted.state = region.state;
       if (!extracted.city && region.city) extracted.city = region.city;
-      if (!extracted.country && /Budapest|Hungary|匈牙利/i.test(source)) extracted.country = "匈牙利";
-      if (!extracted.city && /Budapest/i.test(source)) extracted.city = "Budapest";
+
+      const internationalRegion = inferInternationalRegion(source);
+      if (!extracted.country && internationalRegion.country) extracted.country = internationalRegion.country;
+      if (!extracted.state && internationalRegion.state) extracted.state = internationalRegion.state;
+      if (!extracted.city && internationalRegion.city) extracted.city = internationalRegion.city;
+
       if (!extracted.postalCode) {
         extracted.postalCode = inferPostalCode(source, extracted.city, extracted.state);
       }
@@ -1881,11 +1976,11 @@ SN：SN202605270018
         ]),
         customer: valueByLabels(text, ["客户", "公司", "单位", "Customer", "Company"]),
         country: detectCountry(text),
-        state: valueByLabels(text, ["省", "省份", "州", "State", "Province"]),
-        city: valueByLabels(text, ["城市", "市", "City"]),
+        state: valueByLabels(text, ["省", "省份", "州", "State", "Province", "Region", "County"]),
+        city: valueByLabels(text, ["城市", "市", "City", "Town", "Suburb"]),
         address: detectAddress(text),
         postalCode: valueByLabels(text, ["邮政编码", "邮编", "邮码", "Zip", "Zip Code", "Postal Code", "Postcode", "Postal"]) || firstMatch(text, [
-          /\b([A-Z]\d[A-Z]\s?\d[A-Z]\d|\d{5}(?:-\d{4})?|\d{6})\b/i
+          /\b([A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}|[A-Z]\d[A-Z]\s?\d[A-Z]\d|\d{5}(?:-\d{4})?|\d{4}|\d{6})\b/i
         ]),
         productCategory: valueByLabels(text, ["产品类别", "类别", "Category", "Product Category"]),
         productModel: valueByLabels(text, ["产品型号", "型号", "Model", "Product Model"]) || firstMatch(text, [
