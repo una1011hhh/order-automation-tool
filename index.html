@@ -1111,7 +1111,7 @@
       productModel: "Lubamini2",
       productName: "Luba mini 2 Series",
       machineSn: "SN202605270018",
-      deviceArchive: "DA-2026-0527-0018",
+      deviceArchive: "",
       feedback: "设备开机后提示主刷异常，重启后仍无法恢复，客户申请换机处理。",
       purchaseChannel: "官网商城",
       purchaseDate: "2026-03-18",
@@ -1208,7 +1208,6 @@ SN：SN202605270018
       { section: "产品信息", id: "productModel", label: "产品型号" },
       { section: "产品信息", id: "productName", label: "产品名称" },
       { section: "产品信息", id: "machineSn", label: "车牌号（机器SN）" },
-      { section: "产品信息", id: "deviceArchive", label: "设备档案" },
       { section: "产品信息", id: "feedback", label: "反馈内容" },
       { section: "产品信息", id: "purchaseChannel", label: "购买渠道" },
       { section: "产品信息", id: "purchaseDate", label: "购买日期" },
@@ -1289,7 +1288,13 @@ SN：SN202605270018
       if (options.newCaseNo) {
         startNewCaseNo();
       }
-      Object.keys(mockData).forEach((id) => setValue(id, mockData[id]));
+      Object.keys(mockData).forEach((id) => {
+        if (mockData[id] === "" && fields[id]) {
+          fields[id].value = "";
+        } else {
+          setValue(id, mockData[id]);
+        }
+      });
       rawInput.value = mockRawText;
       normalizePhone();
       refreshAll();
@@ -1711,6 +1716,87 @@ SN：SN202605270018
       return line ? line.replace(/^(地址|Address)\s*[:：-]?\s*/i, "").trim() : "";
     }
 
+    function isLikelyPersonalName(value) {
+      const text = String(value || "").trim();
+      if (!text) return false;
+      if (/(公司|有限|集团|店|中心|学校|学院|医院|部门|团队|旗舰店|专卖店|Customer|Company)/i.test(text)) {
+        return false;
+      }
+      return /^[\u4e00-\u9fa5]{2,5}$/.test(text) || /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}$/.test(text);
+    }
+
+    function syncCustomerAndContact(extracted) {
+      if (extracted.contactName && !extracted.customer) {
+        extracted.customer = extracted.contactName;
+        return;
+      }
+      if (extracted.customer && !extracted.contactName && isLikelyPersonalName(extracted.customer)) {
+        extracted.contactName = extracted.customer;
+      }
+    }
+
+    function inferChinaRegion(text) {
+      const source = String(text || "");
+      const municipalities = ["北京", "上海", "天津", "重庆"];
+      for (const name of municipalities) {
+        if (new RegExp(`${name}市?`).test(source)) {
+          return { country: "中国", state: `${name}市`, city: name };
+        }
+      }
+
+      const provinceCityMatch = source.match(/([\u4e00-\u9fa5]{2,}(?:省|自治区|特别行政区))\s*([\u4e00-\u9fa5]{2,}(?:市|州|盟|地区))/);
+      if (provinceCityMatch) {
+        return {
+          country: "中国",
+          state: provinceCityMatch[1],
+          city: provinceCityMatch[2].replace(/市$/, "")
+        };
+      }
+
+      const cityMatch = source.match(/([\u4e00-\u9fa5]{2,})市/);
+      if (cityMatch) {
+        return { country: "中国", state: "", city: cityMatch[1] };
+      }
+
+      if (/(省|市|区|县|路|街道|号楼|号院)/.test(source)) {
+        return { country: "中国" };
+      }
+
+      return {};
+    }
+
+    function inferPostalCode(text, city, state) {
+      const explicit = valueByLabels(text, ["邮政编码", "邮编", "邮码", "Zip", "Zip Code", "Postal Code", "Postcode"]) ||
+        firstMatch(text, [/\b([A-Z]\d[A-Z]\s?\d[A-Z]\d|\d{5}(?:-\d{4})?|\d{6})\b/i]);
+      if (explicit) return explicit;
+
+      const source = `${text || ""} ${city || ""} ${state || ""}`;
+      const postalByRegion = [
+        ["张江", "201203"], ["浦东", "200120"], ["上海", "200000"],
+        ["北京", "100000"], ["广州", "510000"], ["深圳", "518000"],
+        ["杭州", "310000"], ["南京", "210000"], ["苏州", "215000"],
+        ["成都", "610000"], ["重庆", "400000"], ["武汉", "430000"],
+        ["西安", "710000"], ["天津", "300000"], ["青岛", "266000"],
+        ["宁波", "315000"], ["厦门", "361000"], ["东莞", "523000"],
+        ["佛山", "528000"], ["长沙", "410000"], ["郑州", "450000"],
+        ["合肥", "230000"], ["福州", "350000"], ["济南", "250000"],
+        ["昆明", "650000"], ["南昌", "330000"], ["沈阳", "110000"]
+      ];
+      const match = postalByRegion.find(([keyword]) => source.includes(keyword));
+      return match ? match[1] : "";
+    }
+
+    function inferAddressFields(text, extracted) {
+      const source = `${extracted.address || ""}\n${text || ""}`;
+      const region = inferChinaRegion(source);
+      if (!extracted.country && region.country) extracted.country = region.country;
+      if (!extracted.state && region.state) extracted.state = region.state;
+      if (!extracted.city && region.city) extracted.city = region.city;
+      if (!extracted.postalCode) {
+        extracted.postalCode = inferPostalCode(source, extracted.city, extracted.state);
+      }
+    }
+
     function firstMatch(text, patterns) {
       for (const pattern of patterns) {
         const match = text.match(pattern);
@@ -1825,6 +1911,9 @@ SN：SN202605270018
       if (!["发货单", "维修单", "退件单", "换机单"].includes(extracted.orderType)) {
         extracted.orderType = detectOrderType(extracted.orderType) || detectOrderType(text);
       }
+
+      syncCustomerAndContact(extracted);
+      inferAddressFields(text, extracted);
 
       const productMapping = findProductMapping(extracted.productModel) ||
         findProductMapping(extracted.productName) ||
