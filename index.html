@@ -1724,7 +1724,7 @@ SN：SN202605270018
         required.add("orderNo");
         required.add("machineSn");
       }
-      if (getValue("shippingMethod") === "物流发货") {
+      if (getValue("shippingMethod") === "物流发货" && currentScenarioType !== "任务单") {
         logisticsFieldIds.forEach((id) => required.add(id));
       }
       return required;
@@ -1756,7 +1756,7 @@ SN：SN202605270018
     }
 
     function updateLogisticsVisibility() {
-      const shouldShow = getValue("shippingMethod") === "物流发货";
+      const shouldShow = getValue("shippingMethod") === "物流发货" && currentScenarioType !== "任务单";
       logisticsPanel.classList.toggle("show", shouldShow);
       logisticsPanel.setAttribute("aria-hidden", shouldShow ? "false" : "true");
 
