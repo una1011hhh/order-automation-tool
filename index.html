@@ -220,7 +220,75 @@
 
     .required-mark {
       color: var(--danger);
+      display: none;
       margin-left: 2px;
+    }
+
+    .required-mark.show,
+    .hint .required-mark {
+      display: inline;
+    }
+
+    .scenario-card {
+      margin-bottom: 18px;
+    }
+
+    .scenario-options {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .scenario-option {
+      display: grid;
+      gap: 6px;
+      min-height: 92px;
+      padding: 13px;
+      border: 1px solid #d9e2ef;
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .scenario-option:hover {
+      transform: translateY(-1px);
+      border-color: rgba(37, 99, 235, 0.42);
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
+    }
+
+    .scenario-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .scenario-option:has(input:checked) {
+      border-color: rgba(37, 99, 235, 0.78);
+      background: #eff6ff;
+      box-shadow: inset 4px 0 0 var(--primary);
+    }
+
+    .scenario-name {
+      color: #111827;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .scenario-desc {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .scenario-guide {
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+      line-height: 1.5;
     }
 
     input,
@@ -743,7 +811,8 @@
       }
 
       .main-grid,
-      .form-grid {
+      .form-grid,
+      .scenario-options {
         grid-template-columns: 1fr;
       }
 
@@ -773,6 +842,38 @@
         <p class="case-number-line">当前建单编号：<span id="caseNoText" class="case-number-value">待生成</span></p>
       </div>
       <span class="hint">带 <span class="required-mark">*</span> 的字段为必填；红框表示需要补充或格式错误。</span>
+    </section>
+
+    <section class="card scenario-card">
+      <div class="card-header">
+        <h2>第一步：选择单型</h2>
+        <span>不同单型会自动切换必填项</span>
+      </div>
+      <div class="card-body">
+        <div class="scenario-options" role="radiogroup" aria-label="选择建单单型">
+          <label class="scenario-option">
+            <input type="radio" name="scenarioType" value="寄修单" />
+            <span class="scenario-name">寄修单</span>
+            <span class="scenario-desc">客户寄回维修，重点校验设备、故障、寄修网点和签收状态。</span>
+          </label>
+          <label class="scenario-option">
+            <input type="radio" name="scenarioType" value="退换货单" />
+            <span class="scenario-name">退换货单</span>
+            <span class="scenario-desc">退件或换机处理，重点校验原订单、SN、原因和收发货信息。</span>
+          </label>
+          <label class="scenario-option">
+            <input type="radio" name="scenarioType" value="备件申请单" />
+            <span class="scenario-name">备件申请单</span>
+            <span class="scenario-desc">备件补发/申请，重点校验收件地址、SKU、数量和发货方式。</span>
+          </label>
+          <label class="scenario-option">
+            <input type="radio" name="scenarioType" value="任务单" />
+            <span class="scenario-name">任务单</span>
+            <span class="scenario-desc">内部跟进任务，重点校验受理客服、问题描述和关联客户信息。</span>
+          </label>
+        </div>
+        <div id="scenarioGuide" class="scenario-guide">请选择单型后开始提取或填写信息。</div>
+      </div>
     </section>
 
     <section class="card top-ai-card">
@@ -960,10 +1061,13 @@
                 <label for="orderType">建单需求 <span class="required-mark">*</span></label>
                 <select id="orderType" data-required="true" data-label="建单需求">
                   <option value="">请选择</option>
+                  <option value="寄修单">寄修单</option>
                   <option value="发货单">发货单</option>
                   <option value="维修单">维修单</option>
                   <option value="退件单">退件单</option>
                   <option value="换机单">换机单</option>
+                  <option value="备件申请单">备件申请单</option>
+                  <option value="任务单">任务单</option>
                 </select>
                 <div class="field-error"></div>
               </div>
@@ -1210,6 +1314,8 @@ SN：SN202605270018
     const statusText = document.getElementById("statusText");
     const missingDetail = document.getElementById("missingDetail");
     const caseNoText = document.getElementById("caseNoText");
+    const scenarioInputs = Array.from(document.querySelectorAll('input[name="scenarioType"]'));
+    const scenarioGuide = document.getElementById("scenarioGuide");
     const categoryMower = document.getElementById("categoryMower");
     const categoryPoolRobot = document.getElementById("categoryPoolRobot");
     const productMapHint = document.getElementById("productMapHint");
@@ -1226,10 +1332,49 @@ SN：SN202605270018
     const toast = document.getElementById("toast");
     let toastTimer;
     let currentCaseNo = "";
+    let currentScenarioType = "退换货单";
 
     const logisticsFieldIds = ["country", "city", "address", "postalCode", "phone"];
     const archiveStorageKey = "afterSalesOrderArchives:v1";
     const caseCounterStorageKey = "afterSalesOrderCaseCounter:v1";
+
+    const scenarioConfigs = {
+      "寄修单": {
+        defaultOrderType: "维修单",
+        guide: "寄修单必填：联系人、联系方式、海外地址、产品信息、SN、反馈内容、质保状态、寄修网点、发货/签收状态。",
+        required: [
+          "contactName", "phone", "email", "customer", "country", "city", "address", "postalCode",
+          "productCategory", "productModel", "productName", "machineSn", "feedback", "warrantyStatus",
+          "orderType", "repairSite", "shippingMethod", "newAddress", "signedStatus"
+        ]
+      },
+      "退换货单": {
+        defaultOrderType: "退件单",
+        guide: "退换货单必填：联系人、地址、产品信息、SN、反馈内容、原订单号、退换货原因和物流信息；换机单会额外强调原机器信息。",
+        required: [
+          "contactName", "phone", "email", "customer", "country", "city", "address", "postalCode",
+          "productCategory", "productModel", "productName", "machineSn", "feedback", "warrantyStatus",
+          "orderType", "orderNo", "serviceReason", "shippingMethod", "newAddress", "signedStatus"
+        ]
+      },
+      "备件申请单": {
+        defaultOrderType: "备件申请单",
+        guide: "备件申请单必填：收件人、联系方式、海外地址、产品型号、备件/SKU、数量、申请原因和发货方式。",
+        required: [
+          "contactName", "phone", "email", "customer", "country", "city", "address", "postalCode",
+          "productCategory", "productModel", "productName", "feedback", "orderType", "reshipSku",
+          "quantity", "serviceReason", "shippingMethod", "newAddress"
+        ]
+      },
+      "任务单": {
+        defaultOrderType: "任务单",
+        guide: "任务单必填：受理客服、关联客户、联系方式、反馈内容/任务描述和问题分类；地址和产品信息可按需要补充。",
+        required: [
+          "supportAgent", "contactName", "phone", "email", "customer", "feedback", "problemDescription",
+          "issueCategory", "orderType"
+        ]
+      }
+    };
 
     const productMappings = [
       { name: "Luba mini 2 Series", model: "Lubamini2", category: "Mower" },
@@ -1290,6 +1435,7 @@ SN：SN202605270018
 
     const outputFieldOrder = [
       { section: "系统信息", id: "caseNo", label: "建单编号", system: true },
+      { section: "系统信息", id: "scenarioType", label: "单型", system: true },
       { section: "客户信息", id: "contactName", label: "联系人姓名" },
       { section: "客户信息", id: "phone", label: "联系电话" },
       { section: "客户信息", id: "email", label: "电子邮箱" },
@@ -1385,6 +1531,7 @@ SN：SN202605270018
       if (options.newCaseNo) {
         startNewCaseNo();
       }
+      setScenarioType("退换货单", { applyDefaultOrderType: false });
       Object.keys(mockData).forEach((id) => {
         if (mockData[id] === "" && fields[id]) {
           fields[id].value = "";
@@ -1409,6 +1556,7 @@ SN：SN202605270018
       populateProductModelOptions("");
       syncCategoryChecks();
       productMapHint.textContent = "选择产品型号后会自动带出产品类别和产品名称。";
+      setScenarioType(currentScenarioType, { applyDefaultOrderType: true });
       refreshAll();
       showToast("表单已清空。");
     }
@@ -1434,8 +1582,8 @@ SN：SN202605270018
     function getCleanedRows() {
       return outputFieldOrder.map((item) => ({
         ...item,
-        value: item.system && item.id === "caseNo"
-          ? currentCaseNo
+        value: item.system
+          ? (item.id === "caseNo" ? currentCaseNo : currentScenarioType)
           : cleanFieldValue(item.id, getValue(item.id))
       }));
     }
@@ -1543,10 +1691,68 @@ SN：SN202605270018
       return Array.from(new Set(values.filter(Boolean)));
     }
 
-    function updateDynamicRequirements() {
-      const isExchangeOrder = getValue("orderType") === "换机单";
-      fields.orderNo.dataset.required = isExchangeOrder ? "true" : "false";
-      orderNoRequiredMark.classList.toggle("show", isExchangeOrder);
+    function setScenarioType(scenarioType, options = {}) {
+      const nextScenario = scenarioConfigs[scenarioType] ? scenarioType : "寄修单";
+      currentScenarioType = nextScenario;
+      scenarioInputs.forEach((input) => {
+        input.checked = input.value === nextScenario;
+      });
+
+      const config = scenarioConfigs[nextScenario];
+      if (options.applyDefaultOrderType !== false && config.defaultOrderType) {
+        const allowedCurrentOrderTypes = nextScenario === "退换货单" ? ["退件单", "换机单"] : [config.defaultOrderType];
+        if (!allowedCurrentOrderTypes.includes(getValue("orderType"))) {
+          fields.orderType.value = config.defaultOrderType;
+        }
+      }
+      scenarioGuide.textContent = config.guide;
+      updateDynamicRequirements();
+      updateOutput();
+    }
+
+    function detectScenarioType(text) {
+      if (/任务单|任务描述|跟进任务|Task/i.test(text)) return "任务单";
+      if (/备件申请|备件单|备件|配件|补发SKU|补发 SKU|spare parts?|accessor/i.test(text)) return "备件申请单";
+      if (/退换货|退货|换货|换机|退件|return|exchange|replacement/i.test(text)) return "退换货单";
+      if (/寄修|维修|repair|检修/i.test(text)) return "寄修单";
+      return "";
+    }
+
+    function getActiveRequiredFields() {
+      const required = new Set(scenarioConfigs[currentScenarioType]?.required || []);
+      if (getValue("orderType") === "换机单") {
+        required.add("orderNo");
+        required.add("machineSn");
+      }
+      if (getValue("shippingMethod") === "物流发货") {
+        logisticsFieldIds.forEach((id) => required.add(id));
+      }
+      return required;
+    }
+
+    function updateRequiredIndicators(requiredSet) {
+      Object.keys(fields).forEach((id) => {
+        const label = document.querySelector(`label[for="${id}"]`);
+        if (!label) return;
+        let marker = label.querySelector(".required-mark");
+        if (!marker && requiredSet.has(id)) {
+          marker = document.createElement("span");
+          marker.className = "required-mark";
+          marker.textContent = "*";
+          label.appendChild(marker);
+        }
+        if (marker) {
+          marker.classList.toggle("show", requiredSet.has(id));
+        }
+      });
+    }
+
+    function updateDynamicRequirements(requiredSet = getActiveRequiredFields()) {
+      Object.entries(fields).forEach(([id, field]) => {
+        field.dataset.required = requiredSet.has(id) ? "true" : "false";
+      });
+      updateRequiredIndicators(requiredSet);
+      orderNoRequiredMark.classList.toggle("show", requiredSet.has("orderNo"));
     }
 
     function updateLogisticsVisibility() {
@@ -2174,8 +2380,18 @@ SN：SN202605270018
       }
 
       extracted.orderType = valueByLabels(text, ["建单需求", "单据类型", "售后类型", "需求", "Order Type", "Service Type"]) || detectOrderType(text);
-      if (!["发货单", "维修单", "退件单", "换机单"].includes(extracted.orderType)) {
+      if (!["发货单", "维修单", "退件单", "换机单", "备件申请单", "任务单", "寄修单"].includes(extracted.orderType)) {
         extracted.orderType = detectOrderType(extracted.orderType) || detectOrderType(text);
+      }
+
+      const detectedScenario = detectScenarioType(text) ||
+        (["退件单", "换机单"].includes(extracted.orderType) ? "退换货单" : "") ||
+        (["维修单", "寄修单"].includes(extracted.orderType) ? "寄修单" : "") ||
+        (extracted.orderType === "备件申请单" ? "备件申请单" : "") ||
+        (extracted.orderType === "任务单" ? "任务单" : "") ||
+        (extracted.orderType === "发货单" && /备件|配件|SKU|补发/i.test(text) ? "备件申请单" : "");
+      if (detectedScenario) {
+        setScenarioType(detectedScenario, { applyDefaultOrderType: false });
       }
 
       syncCustomerAndContact(extracted);
@@ -2288,9 +2504,11 @@ SN：SN202605270018
         Object.entries(fields).map(([id, field]) => [id, cleanFieldValue(id, field.value)])
       );
       values.caseNo = currentCaseNo;
+      values.scenarioType = currentScenarioType;
       return {
         id: `${currentCaseNo}-${Date.now()}`,
         caseNo: currentCaseNo,
+        scenarioType: currentScenarioType,
         createdAt: new Date().toISOString(),
         title: values.contactName || values.customer || values.machineSn || currentCaseNo || "未命名客户",
         rawInput: rawInput.value.trim(),
@@ -2325,6 +2543,7 @@ SN：SN202605270018
         return;
       }
       setCurrentCaseNo(record.caseNo || record.values?.caseNo || generateCaseNo());
+      setScenarioType(record.scenarioType || record.values?.scenarioType || currentScenarioType, { applyDefaultOrderType: false });
       Object.entries(record.values || {}).forEach(([id, value]) => setValue(id, value));
       rawInput.value = record.rawInput || "";
       refreshAll();
@@ -2363,7 +2582,8 @@ SN：SN202605270018
             <span>${escapeHtml(formatArchiveTime(record.createdAt))}</span>
           </div>
           <div class="archive-meta">
-            <div>建单需求：${escapeHtml(values.orderType || "未填写")} / 质保：${escapeHtml(values.warrantyStatus || "未填写")}</div>
+            <div>单型：${escapeHtml(record.scenarioType || values.scenarioType || "未填写")} / 建单需求：${escapeHtml(values.orderType || "未填写")}</div>
+            <div>质保：${escapeHtml(values.warrantyStatus || "未填写")}</div>
             <div>型号：${escapeHtml(values.productModel || "未填写")} / SN：${escapeHtml(values.machineSn || "未填写")}</div>
             <div>受理客服：${escapeHtml(values.supportAgent || "未填写")} / 电话：${escapeHtml(values.phone || "未填写")}</div>
           </div>
@@ -2498,6 +2718,14 @@ SN：SN202605270018
     categoryPoolRobot.addEventListener("change", () => handleCategorySelection("Pool Robot", categoryPoolRobot.checked));
     fields.productModel.addEventListener("change", handleProductModelChange);
     openMapBtn.addEventListener("click", openGoogleMaps);
+    scenarioInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        if (input.checked) {
+          setScenarioType(input.value, { applyDefaultOrderType: true });
+          refreshAll();
+        }
+      });
+    });
 
     document.getElementById("extractBtn").addEventListener("click", extractInfoFromText);
     document.getElementById("validateBtn").addEventListener("click", () => {
