@@ -80,12 +80,13 @@
       display: flex;
       align-items: center;
       gap: 9px;
-      max-width: 620px;
+      max-width: none;
       margin: 0 0 10px;
-      font-size: clamp(38px, 5vw, 64px);
+      font-size: clamp(40px, 4.2vw, 58px);
       font-weight: 680;
-      line-height: 0.98;
+      line-height: 1;
       letter-spacing: 0;
+      white-space: nowrap;
     }
 
     h1::before {
@@ -741,8 +742,9 @@
       }
 
       h1 {
-        font-size: 34px;
+        font-size: clamp(30px, 9vw, 40px);
         line-height: 1.05;
+        white-space: normal;
       }
 
       h1::before {
