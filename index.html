@@ -6,23 +6,27 @@
   <title>售后物流建单助手 - 优化版</title>
   <style>
     :root {
-      --bg: #f4f6f8;
+      --bg: #f3f6f8;
       --panel: #ffffff;
-      --panel-soft: #f8fafc;
-      --text: #182230;
-      --muted: #667085;
-      --line: #d7dde7;
-      --line-strong: #b9c2d0;
-      --primary: #176b87;
-      --primary-dark: #105267;
-      --accent: #8a5a20;
-      --danger: #c7362f;
-      --danger-bg: #fff3f1;
-      --success: #16724f;
-      --success-bg: #edf9f3;
-      --warning: #9f5f12;
-      --warning-bg: #fff7e8;
-      --shadow: 0 10px 26px rgba(20, 32, 45, 0.08);
+      --panel-soft: #f7faf9;
+      --text: #17212b;
+      --muted: #64748b;
+      --line: #d8e1e8;
+      --line-strong: #b8c7d4;
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --primary-soft: #e6f4f1;
+      --accent: #b7791f;
+      --accent-soft: #fff4db;
+      --danger: #bf3b30;
+      --danger-bg: #fff1ef;
+      --success: #1f7a4d;
+      --success-bg: #edf8f1;
+      --warning: #9a5b13;
+      --warning-bg: #fff7e6;
+      --header: #122033;
+      --header-soft: #1e3349;
+      --shadow: 0 12px 28px rgba(18, 32, 51, 0.08);
       --radius: 8px;
     }
 
@@ -60,7 +64,8 @@
       padding: 18px 20px;
       margin-bottom: 14px;
       color: #fff;
-      background: #243447;
+      background: var(--header);
+      border: 1px solid #22364c;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
@@ -92,7 +97,7 @@
       padding: 10px 12px;
       color: #344054;
       background: #eef2f6;
-      border: 1px solid rgba(215, 221, 231, 0.9);
+      border: 1px solid #d5e0e8;
       border-radius: var(--radius);
       font-size: 11px;
       line-height: 1.25;
@@ -152,6 +157,7 @@
       padding: 13px 15px;
       background: var(--panel-soft);
       border-bottom: 1px solid var(--line);
+      border-left: 3px solid var(--primary);
     }
 
     .card-header h2 {
@@ -186,7 +192,7 @@
       gap: 8px;
       margin-bottom: 14px;
       padding: 8px;
-      background: var(--panel);
+      background: #eef3f5;
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -197,10 +203,10 @@
       gap: 3px;
       min-height: 58px;
       padding: 9px 10px;
-      color: #344054;
+      color: #334155;
       text-align: left;
-      background: #f7f9fb;
-      border: 1px solid transparent;
+      background: #ffffff;
+      border: 1px solid #dbe5eb;
       border-radius: var(--radius);
       font-size: 13px;
       line-height: 1.25;
@@ -216,10 +222,11 @@
       color: #fff;
       background: var(--primary);
       border-color: var(--primary-dark);
+      box-shadow: 0 8px 18px rgba(15, 118, 110, 0.18);
     }
 
     .workflow-tab.active span {
-      color: #d7edf2;
+      color: #d7f3ef;
     }
 
     .status-copy {
@@ -242,7 +249,7 @@
       width: 100%;
       height: 8px;
       overflow: hidden;
-      background: #e4e8ef;
+      background: #e3eaf0;
       border-radius: 999px;
     }
 
@@ -259,8 +266,8 @@
       min-height: 24px;
       padding: 2px 8px;
       color: var(--primary);
-      background: #e8f3f6;
-      border: 1px solid #c7e1e8;
+      background: var(--primary-soft);
+      border: 1px solid #b9dcd6;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
@@ -269,13 +276,13 @@
     .badge.warn {
       color: var(--warning);
       background: var(--warning-bg);
-      border-color: #f4d19a;
+      border-color: #e8c887;
     }
 
     .badge.done {
       color: var(--success);
       background: var(--success-bg);
-      border-color: #bce7d0;
+      border-color: #b9dfc7;
     }
 
     .form-grid {
@@ -318,7 +325,7 @@
       border-radius: var(--radius);
       outline: none;
       color: var(--text);
-      background: #fff;
+      background: #ffffff;
       transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
     }
 
@@ -341,7 +348,7 @@
     select:focus,
     textarea:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(23, 107, 135, 0.14);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
     }
 
     .is-invalid {
@@ -367,7 +374,7 @@
 
     .output-textarea {
       min-height: 250px;
-      background: #fbfcfe;
+      background: #f8fbfa;
       font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
       font-size: 13px;
       white-space: pre;
@@ -403,19 +410,19 @@
 
     .btn-secondary {
       color: #172033;
-      background: #e6ebf1;
+      background: #e7edf2;
     }
 
     .btn-ghost {
       color: #fff;
-      background: rgba(255, 255, 255, 0.11);
-      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.24);
     }
 
     .btn-outline {
       color: var(--primary);
       background: #fff;
-      border: 1px solid #b6d6df;
+      border: 1px solid #acd5cf;
     }
 
     .btn-version {
@@ -425,7 +432,7 @@
       padding: 6px 8px;
       color: var(--primary);
       background: #fff;
-      border: 1px solid #c7d6df;
+      border: 1px solid #bdd8d4;
       font-size: 11px;
     }
 
@@ -451,13 +458,13 @@
     .notice-list li {
       color: var(--warning);
       background: var(--warning-bg);
-      border: 1px solid #f3d7aa;
+      border: 1px solid #e8c887;
     }
 
     .notice-list li.error {
       color: var(--danger);
       background: var(--danger-bg);
-      border-color: #f1beb9;
+      border-color: #edc2be;
     }
 
     .workflow-recommendation {
@@ -466,8 +473,8 @@
       margin-top: 11px;
       padding: 10px;
       color: #344054;
-      background: #eef7f8;
-      border: 1px solid #bddde4;
+      background: var(--primary-soft);
+      border: 1px solid #b9dcd6;
       border-radius: var(--radius);
       font-size: 12px;
       line-height: 1.45;
@@ -484,13 +491,13 @@
     .missing-list button {
       color: var(--danger);
       background: var(--danger-bg);
-      border: 1px solid #f1beb9;
+      border: 1px solid #edc2be;
       font-weight: 700;
     }
 
     .missing-list button:hover {
       transform: none;
-      background: #ffe8e4;
+      background: #ffe6e2;
     }
 
     .empty-state {
@@ -508,8 +515,8 @@
       padding: 11px 14px;
       border-radius: var(--radius);
       color: #fff;
-      background: #182230;
-      box-shadow: 0 16px 34px rgba(20, 32, 45, 0.2);
+      background: var(--header);
+      box-shadow: 0 16px 34px rgba(18, 32, 51, 0.2);
       opacity: 0;
       transform: translateY(10px);
       pointer-events: none;
@@ -545,7 +552,7 @@
       margin-top: 8px;
       padding: 3px 8px;
       color: var(--primary);
-      background: #eef2f6;
+      background: var(--primary-soft);
       border: 1px solid var(--line);
       border-radius: 999px;
       font-size: 11px;
@@ -561,7 +568,7 @@
       align-items: center;
       justify-content: center;
       padding: 18px;
-      background: rgba(24, 34, 48, 0.42);
+      background: rgba(18, 32, 51, 0.44);
     }
 
     .modal-backdrop.show {
@@ -574,7 +581,7 @@
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      box-shadow: 0 22px 54px rgba(20, 32, 45, 0.24);
+      box-shadow: 0 22px 54px rgba(18, 32, 51, 0.24);
     }
 
     .modal-header {
