@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>售后物流建单助手 </title>
+  <title>售后物流建单助手 - 优化版</title>
   <style>
     :root {
       --bg: #f4f6f8;
@@ -78,6 +78,35 @@
       font-size: 13px;
     }
 
+    /* Version information */
+    .header-tools {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .version-card {
+      display: grid;
+      gap: 4px;
+      min-width: 170px;
+      padding: 10px 12px;
+      color: #344054;
+      background: #eef2f6;
+      border: 1px solid rgba(215, 221, 231, 0.9);
+      border-radius: var(--radius);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .version-card strong {
+      color: #182230;
+      font-size: 12px;
+    }
+
+    .version-card span {
+      display: block;
+    }
+
     .topbar-actions,
     .button-row {
       display: flex;
@@ -150,6 +179,49 @@
       margin-bottom: 14px;
     }
 
+    /* Workflow navigation */
+    .workflow-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 8px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .workflow-tab {
+      display: grid;
+      gap: 3px;
+      min-height: 58px;
+      padding: 9px 10px;
+      color: #344054;
+      text-align: left;
+      background: #f7f9fb;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .workflow-tab span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .workflow-tab.active {
+      color: #fff;
+      background: var(--primary);
+      border-color: var(--primary-dark);
+    }
+
+    .workflow-tab.active span {
+      color: #d7edf2;
+    }
+
     .status-copy {
       display: grid;
       gap: 7px;
@@ -218,6 +290,10 @@
 
     .field.full {
       grid-column: 1 / -1;
+    }
+
+    .field.is-hidden {
+      display: none;
     }
 
     label {
@@ -342,6 +418,17 @@
       border: 1px solid #b6d6df;
     }
 
+    .btn-version {
+      width: 100%;
+      min-height: 30px;
+      margin-top: 6px;
+      padding: 6px 8px;
+      color: var(--primary);
+      background: #fff;
+      border: 1px solid #c7d6df;
+      font-size: 11px;
+    }
+
     .notice-list,
     .missing-list {
       display: grid;
@@ -371,6 +458,27 @@
       color: var(--danger);
       background: var(--danger-bg);
       border-color: #f1beb9;
+    }
+
+    .workflow-recommendation {
+      display: none;
+      gap: 8px;
+      margin-top: 11px;
+      padding: 10px;
+      color: #344054;
+      background: #eef7f8;
+      border: 1px solid #bddde4;
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .workflow-recommendation.show {
+      display: grid;
+    }
+
+    .workflow-recommendation strong {
+      color: var(--primary);
     }
 
     .missing-list button {
@@ -414,6 +522,108 @@
       transform: translateY(0);
     }
 
+    /* Feedback footer */
+    .app-footer {
+      margin-top: 24px;
+      padding: 18px 12px 0;
+      color: var(--muted);
+      text-align: center;
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .app-footer strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .footer-version {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 3px 8px;
+      color: var(--primary);
+      background: #eef2f6;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Release notes modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(24, 34, 48, 0.42);
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: min(100%, 460px);
+      overflow: hidden;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 22px 54px rgba(20, 32, 45, 0.24);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--panel-soft);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .modal-close {
+      width: 32px;
+      min-height: 32px;
+      padding: 0;
+      color: var(--muted);
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 16px;
+    }
+
+    .release-version {
+      margin: 0 0 10px;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .release-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding-left: 18px;
+      color: #344054;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
     @media (max-width: 1180px) {
       .layout {
         grid-template-columns: 1fr;
@@ -435,6 +645,15 @@
         grid-template-columns: 1fr;
       }
 
+      .workflow-tabs {
+        grid-template-columns: 1fr;
+      }
+
+      .header-tools {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
       .main-grid,
       .form-grid {
         grid-template-columns: 1fr;
@@ -449,6 +668,10 @@
       .button-row button {
         flex: 1 1 130px;
       }
+
+      .version-card {
+        min-width: 0;
+      }
     }
   </style>
 </head>
@@ -459,16 +682,45 @@
         <h1>售后物流建单助手</h1>
         <p>把客户原文整理成可复制的建单信息，并在提交前检查缺项和业务规则。</p>
       </div>
-      <div class="topbar-actions">
-        <button type="button" class="btn-ghost" id="loadMockBtn">载入示例</button>
-        <button type="button" class="btn-ghost" id="clearBtn">清空</button>
+      <div class="header-tools">
+        <!-- Version information -->
+        <div class="version-card" aria-label="Version information">
+          <strong>Version: <span id="headerVersion"></span></strong>
+          <span>Last Updated: <span id="lastUpdated"></span></span>
+          <button type="button" class="btn-version" id="whatsNewBtn">What's New</button>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="btn-ghost" id="loadMockBtn">载入示例</button>
+          <button type="button" class="btn-ghost" id="clearBtn">清空</button>
+        </div>
       </div>
     </header>
+
+    <!-- Workflow navigation -->
+    <nav class="workflow-tabs" aria-label="Order workflow">
+      <button type="button" class="workflow-tab active" data-workflow="repair">
+        Repair Order
+        <span>Diagnosis and repair intake</span>
+      </button>
+      <button type="button" class="workflow-tab" data-workflow="returnExchange">
+        Return / Exchange Order
+        <span>Returned unit and exchange review</span>
+      </button>
+      <button type="button" class="workflow-tab" data-workflow="spareParts">
+        Spare Parts Request
+        <span>Parts request and fulfillment</span>
+      </button>
+      <button type="button" class="workflow-tab" data-workflow="replacementShipment">
+        Replacement Shipment
+        <span>Replacement outbound shipment</span>
+      </button>
+    </nav>
 
     <section class="status-panel" aria-live="polite">
       <div class="status-copy">
         <div class="status-line">
           <strong id="statusText">正在检查表单</strong>
+          <span id="workflowBadge" class="badge">Repair Order</span>
           <span id="requiredBadge" class="badge warn">0/0 已完成</span>
           <span id="ruleBadge" class="badge done">规则正常</span>
         </div>
@@ -740,6 +992,13 @@
               <button type="button" class="btn-primary" id="extractBtn">提取信息</button>
               <button type="button" class="btn-secondary" id="clearRawBtn">清空原文</button>
             </div>
+            <div id="workflowRecommendation" class="workflow-recommendation">
+              <div>
+                <strong>Suggested workflow:</strong>
+                <span id="workflowRecommendationText"></span>
+              </div>
+              <button type="button" class="btn-outline" id="applyWorkflowRecommendationBtn">Use Suggested Workflow</button>
+            </div>
             <ul id="extractNotices" class="notice-list"></ul>
           </div>
         </section>
@@ -771,11 +1030,45 @@
         </section>
       </aside>
     </div>
+
+    <!-- Feedback and contact footer -->
+    <footer class="app-footer">
+      <strong>Need Help or Found an Issue?</strong>
+      <span>Please contact Una.</span>
+      <span class="footer-version">Version: <span id="footerVersion"></span></span>
+    </footer>
+  </div>
+
+  <!-- Release notes modal -->
+  <div id="releaseModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="releaseTitle" hidden>
+    <section class="modal">
+      <div class="modal-header">
+        <h2 id="releaseTitle">What's New</h2>
+        <button type="button" class="modal-close" id="closeReleaseBtn" aria-label="Close release notes">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="release-version" id="releaseVersion"></p>
+        <ul class="release-list" id="releaseNotesList"></ul>
+      </div>
+    </section>
   </div>
 
   <div id="toast" class="toast"></div>
 
   <script>
+    // Version and release notes configuration
+    const appRelease = {
+      version: "V1.0.0",
+      lastUpdated: "2026-06-05",
+      notes: [
+        "Added AI extraction area",
+        "Added completion validation",
+        "Added logistics output formatting",
+        "Added responsive layout",
+        "Added GitHub Pages deployment support"
+      ]
+    };
+
     const fieldIds = [
       "contactName", "phone", "email", "customer", "country", "state", "city",
       "address", "postalCode", "repairSite", "supportAgent", "productCategory",
@@ -790,6 +1083,7 @@
     const rawInput = document.getElementById("rawInput");
     const output = document.getElementById("output");
     const statusText = document.getElementById("statusText");
+    const workflowBadge = document.getElementById("workflowBadge");
     const requiredBadge = document.getElementById("requiredBadge");
     const ruleBadge = document.getElementById("ruleBadge");
     const progressFill = document.getElementById("progressFill");
@@ -799,8 +1093,20 @@
     const ruleNotices = document.getElementById("ruleNotices");
     const ruleEmpty = document.getElementById("ruleEmpty");
     const extractNotices = document.getElementById("extractNotices");
+    const headerVersion = document.getElementById("headerVersion");
+    const footerVersion = document.getElementById("footerVersion");
+    const lastUpdated = document.getElementById("lastUpdated");
+    const releaseModal = document.getElementById("releaseModal");
+    const releaseVersion = document.getElementById("releaseVersion");
+    const releaseNotesList = document.getElementById("releaseNotesList");
+    const workflowTabs = Array.from(document.querySelectorAll(".workflow-tab"));
+    const workflowRecommendation = document.getElementById("workflowRecommendation");
+    const workflowRecommendationText = document.getElementById("workflowRecommendationText");
+    const applyWorkflowRecommendationBtn = document.getElementById("applyWorkflowRecommendationBtn");
     const toast = document.getElementById("toast");
     const storageKey = "after_sales_logistics_order_helper_v2";
+    let activeWorkflow = "repair";
+    let recommendedWorkflow = "";
     let toastTimer;
 
     const mockData = {
@@ -863,29 +1169,139 @@ SN：SN202605270018
 是否新地址收货：否
 是否已签收：未签收`;
 
-    const outputGroups = [
-      ["客户信息", [
-        ["联系人姓名", "contactName"], ["联系电话", "phone"], ["电子邮箱", "email"],
-        ["客户", "customer"], ["国家/地区", "country"], ["州/省", "state"],
-        ["城市", "city"], ["详细地址", "address"], ["邮政编码", "postalCode"],
-        ["寄修网点", "repairSite"], ["客服", "supportAgent"]
-      ]],
-      ["产品信息", [
-        ["产品类别", "productCategory"], ["产品型号", "productModel"], ["产品名称", "productName"],
-        ["车牌号（机器 SN）", "machineSn"], ["设备档案", "deviceArchive"],
-        ["购买渠道", "purchaseChannel"], ["购买日期", "purchaseDate"],
-        ["发票号", "invoiceNo"], ["订单号", "orderNo"], ["问题分类", "issueCategory"],
-        ["质保状态", "warrantyStatus"], ["反馈内容", "feedback"], ["备注", "remarks"]
-      ]],
-      ["售后信息", [
-        ["建单需求", "orderType"], ["产品 SKU", "productSku"], ["退回产品 SKU", "returnSku"],
-        ["补发 SKU", "reshipSku"], ["数量", "quantity"], ["是否告知手续费", "feeNotified"],
-        ["故障/问题描述", "problemDescription"], ["退件/补发/发货原因", "serviceReason"]
-      ]],
-      ["发货信息", [
-        ["发货方式", "shippingMethod"], ["是否新地址收货", "newAddress"], ["是否已签收", "signedStatus"]
-      ]]
+    const commonCustomerFields = [
+      "contactName", "phone", "email", "customer", "country", "state", "city",
+      "address", "postalCode", "supportAgent"
     ];
+
+    const commonCustomerRequired = [
+      "contactName", "phone", "email", "customer", "country", "city", "address", "postalCode"
+    ];
+
+    const workflowOrderTypeMap = {
+      repair: "维修单",
+      returnExchange: "退件单",
+      spareParts: "发货单",
+      replacementShipment: "换机单"
+    };
+
+    const workflowConfigs = {
+      repair: {
+        label: "Repair Order",
+        subtitle: "Diagnosis and repair intake",
+        visibleFields: [
+          "repairSite", "productCategory", "productModel", "productName", "machineSn",
+          "deviceArchive", "purchaseChannel", "purchaseDate", "invoiceNo", "orderNo",
+          "issueCategory", "warrantyStatus", "feedback", "problemDescription",
+          "feeNotified", "shippingMethod", "signedStatus", "remarks"
+        ],
+        requiredFields: [
+          "repairSite", "productCategory", "productModel", "productName", "machineSn",
+          "warrantyStatus", "feedback", "problemDescription", "shippingMethod"
+        ],
+        outputGroups: [
+          ["Customer Information", ["contactName", "phone", "email", "customer", "country", "state", "city", "address", "postalCode", "supportAgent"]],
+          ["Repair Details", ["repairSite", "productCategory", "productModel", "productName", "machineSn", "deviceArchive", "issueCategory", "warrantyStatus", "feedback", "problemDescription", "feeNotified", "remarks"]],
+          ["Reference", ["purchaseChannel", "purchaseDate", "invoiceNo", "orderNo", "shippingMethod", "signedStatus"]]
+        ]
+      },
+      returnExchange: {
+        label: "Return / Exchange Order",
+        subtitle: "Returned unit and exchange review",
+        visibleFields: [
+          "productCategory", "productModel", "productName", "machineSn", "purchaseChannel",
+          "purchaseDate", "invoiceNo", "orderNo", "issueCategory", "warrantyStatus",
+          "feedback", "returnSku", "reshipSku", "quantity", "problemDescription",
+          "serviceReason", "feeNotified", "shippingMethod", "newAddress", "signedStatus", "remarks"
+        ],
+        requiredFields: [
+          "productModel", "productName", "machineSn", "orderNo", "warrantyStatus",
+          "feedback", "returnSku", "serviceReason", "shippingMethod", "newAddress", "signedStatus"
+        ],
+        outputGroups: [
+          ["Customer Information", ["contactName", "phone", "email", "customer", "country", "state", "city", "address", "postalCode", "supportAgent"]],
+          ["Return / Exchange Details", ["productCategory", "productModel", "productName", "machineSn", "orderNo", "warrantyStatus", "returnSku", "reshipSku", "quantity", "serviceReason", "problemDescription", "feedback", "feeNotified", "remarks"]],
+          ["Logistics", ["shippingMethod", "newAddress", "signedStatus"]]
+        ]
+      },
+      spareParts: {
+        label: "Spare Parts Request",
+        subtitle: "Parts request and fulfillment",
+        visibleFields: [
+          "productCategory", "productModel", "productName", "machineSn", "deviceArchive",
+          "orderNo", "warrantyStatus", "feedback", "productSku", "reshipSku",
+          "quantity", "serviceReason", "shippingMethod", "newAddress", "remarks"
+        ],
+        requiredFields: [
+          "productModel", "productName", "warrantyStatus", "feedback", "reshipSku",
+          "quantity", "serviceReason", "shippingMethod", "newAddress"
+        ],
+        outputGroups: [
+          ["Customer Information", ["contactName", "phone", "email", "customer", "country", "state", "city", "address", "postalCode", "supportAgent"]],
+          ["Spare Parts Request", ["productCategory", "productModel", "productName", "machineSn", "deviceArchive", "orderNo", "warrantyStatus", "productSku", "reshipSku", "quantity", "serviceReason", "feedback", "remarks"]],
+          ["Fulfillment", ["shippingMethod", "newAddress"]]
+        ]
+      },
+      replacementShipment: {
+        label: "Replacement Shipment",
+        subtitle: "Replacement outbound shipment",
+        visibleFields: [
+          "productCategory", "productModel", "productName", "machineSn", "deviceArchive",
+          "purchaseChannel", "purchaseDate", "invoiceNo", "orderNo", "issueCategory",
+          "warrantyStatus", "feedback", "returnSku", "reshipSku", "quantity",
+          "problemDescription", "serviceReason", "feeNotified", "shippingMethod",
+          "newAddress", "signedStatus", "remarks"
+        ],
+        requiredFields: [
+          "productModel", "productName", "machineSn", "orderNo", "warrantyStatus",
+          "feedback", "returnSku", "reshipSku", "quantity", "serviceReason",
+          "shippingMethod", "newAddress", "signedStatus"
+        ],
+        outputGroups: [
+          ["Customer Information", ["contactName", "phone", "email", "customer", "country", "state", "city", "address", "postalCode", "supportAgent"]],
+          ["Replacement Shipment", ["productCategory", "productModel", "productName", "machineSn", "orderNo", "warrantyStatus", "returnSku", "reshipSku", "quantity", "serviceReason", "problemDescription", "feedback", "feeNotified", "remarks"]],
+          ["Outbound Logistics", ["shippingMethod", "newAddress", "signedStatus"]]
+        ]
+      }
+    };
+
+    const fieldLabels = {
+      contactName: "联系人姓名",
+      phone: "联系电话",
+      email: "电子邮箱",
+      customer: "客户",
+      country: "国家/地区",
+      state: "州/省",
+      city: "城市",
+      address: "详细地址",
+      postalCode: "邮政编码",
+      repairSite: "寄修网点",
+      supportAgent: "客服",
+      productCategory: "产品类别",
+      productModel: "产品型号",
+      productName: "产品名称",
+      machineSn: "车牌号（机器 SN）",
+      deviceArchive: "设备档案",
+      purchaseChannel: "购买渠道",
+      purchaseDate: "购买日期",
+      invoiceNo: "发票号",
+      orderNo: "订单号",
+      issueCategory: "问题分类",
+      warrantyStatus: "质保状态",
+      feedback: "反馈内容",
+      remarks: "备注",
+      orderType: "建单需求",
+      productSku: "产品 SKU",
+      returnSku: "退回产品 SKU",
+      reshipSku: "补发 SKU",
+      quantity: "数量",
+      problemDescription: "故障/问题描述",
+      serviceReason: "退件/补发/发货原因",
+      feeNotified: "是否告知手续费",
+      shippingMethod: "发货方式",
+      newAddress: "是否新地址收货",
+      signedStatus: "是否已签收"
+    };
 
     function getValue(id) {
       return fields[id] ? fields[id].value.trim() : "";
@@ -928,7 +1344,72 @@ SN：SN202605270018
     }
 
     function collectPayload() {
-      return Object.fromEntries(Object.entries(fields).map(([id, field]) => [id, field.value.trim()]));
+      return {
+        activeWorkflow,
+        ...Object.fromEntries(Object.entries(fields).map(([id, field]) => [id, field.value.trim()]))
+      };
+    }
+
+    function getActiveWorkflowConfig() {
+      return workflowConfigs[activeWorkflow] || workflowConfigs.repair;
+    }
+
+    function getRequiredFieldIds() {
+      return Array.from(new Set([...commonCustomerRequired, ...getActiveWorkflowConfig().requiredFields]));
+    }
+
+    function getVisibleFieldIds() {
+      return Array.from(new Set([...commonCustomerFields, ...getActiveWorkflowConfig().visibleFields]));
+    }
+
+    function initializeWorkflowFields() {
+      Object.entries(fields).forEach(([id, field]) => {
+        const wrapper = field.closest(".field");
+        if (wrapper) wrapper.dataset.fieldId = id;
+        if (!field.dataset.label) field.dataset.label = fieldLabels[id] || id;
+      });
+    }
+
+    function syncRequiredMarks(requiredIds) {
+      Object.entries(fields).forEach(([id, field]) => {
+        const label = field.parentElement.querySelector("label");
+        if (!label) return;
+        let mark = label.querySelector(".required-mark");
+        const required = requiredIds.includes(id);
+        if (required && !mark) {
+          mark = document.createElement("span");
+          mark.className = "required-mark";
+          mark.textContent = "*";
+          label.appendChild(mark);
+        }
+        if (mark) mark.style.display = required ? "" : "none";
+      });
+    }
+
+    function syncWorkflowView() {
+      const visibleIds = getVisibleFieldIds();
+      const requiredIds = getRequiredFieldIds();
+      workflowTabs.forEach((tab) => {
+        const isActive = tab.dataset.workflow === activeWorkflow;
+        tab.classList.toggle("active", isActive);
+        tab.setAttribute("aria-selected", String(isActive));
+      });
+      Object.entries(fields).forEach(([id, field]) => {
+        const wrapper = field.closest(".field");
+        if (wrapper) wrapper.classList.toggle("is-hidden", !visibleIds.includes(id));
+      });
+      fields.orderType.value = workflowOrderTypeMap[activeWorkflow] || "";
+      syncRequiredMarks(requiredIds);
+    }
+
+    function setWorkflow(workflow, options = {}) {
+      if (!workflowConfigs[workflow]) return;
+      activeWorkflow = workflow;
+      syncWorkflowView();
+      validateForm();
+      if (!options.silent) {
+        showToast(`已切换到 ${workflowConfigs[workflow].label}。`);
+      }
     }
 
     function validateForm() {
@@ -936,9 +1417,11 @@ SN：SN202605270018
       Object.values(fields).forEach(clearFieldError);
       const missing = [];
       const ruleErrors = [];
+      const requiredIds = getRequiredFieldIds();
 
-      Object.values(fields).forEach((field) => {
-        if (field.dataset.required === "true" && !field.value.trim()) {
+      requiredIds.forEach((id) => {
+        const field = fields[id];
+        if (field && !field.value.trim()) {
           const label = field.dataset.label || "必填项";
           missing.push({ id: field.id, label });
           setFieldError(field, `${label}为必填项`);
@@ -960,19 +1443,25 @@ SN：SN202605270018
         setFieldError(fields.quantity, "数量不能小于 1");
       }
 
-      if (getValue("orderType") === "换机单") {
-        requireByRule(["orderNo", "machineSn", "returnSku", "reshipSku"], ruleErrors, "换机单");
+      if (getValue("quantity") && Number(getValue("quantity")) < 1) {
+        ruleErrors.push("数量不能小于 1");
+        setFieldError(fields.quantity, "数量不能小于 1");
       }
 
-      if (getValue("orderType") === "退件单") {
-        requireByRule(["returnSku", "serviceReason"], ruleErrors, "退件单");
+      if (activeWorkflow === "repair" && getValue("warrantyStatus") === "保外" && !getValue("feeNotified")) {
+        ruleErrors.push("保外维修建议确认是否已告知手续费");
+        setFieldError(fields.feeNotified, "保外维修建议确认手续费告知状态");
       }
 
-      if (getValue("orderType") === "发货单") {
-        requireByRule(["reshipSku", "quantity", "serviceReason"], ruleErrors, "发货单");
+      if (activeWorkflow === "returnExchange" && !getValue("returnSku")) {
+        ruleErrors.push("退换流程需要明确退回产品 SKU");
       }
 
-      if (getValue("shippingMethod") === "物流发货") {
+      if (["spareParts", "replacementShipment"].includes(activeWorkflow) && !getValue("reshipSku")) {
+        ruleErrors.push("出库发货流程需要补发 SKU");
+      }
+
+      if (getValue("shippingMethod") === "物流发货" || ["spareParts", "replacementShipment"].includes(activeWorkflow)) {
         requireByRule(["country", "city", "address", "postalCode", "phone"], ruleErrors, "物流发货");
       }
 
@@ -998,12 +1487,13 @@ SN：SN202605270018
     }
 
     function updateStatus(missingCount, ruleErrorCount) {
-      const requiredFields = Object.values(fields).filter((field) => field.dataset.required === "true");
-      const filledCount = requiredFields.filter((field) => field.value.trim()).length;
-      const percent = requiredFields.length ? Math.round((filledCount / requiredFields.length) * 100) : 100;
+      const requiredIds = getRequiredFieldIds();
+      const filledCount = requiredIds.filter((id) => getValue(id)).length;
+      const percent = requiredIds.length ? Math.round((filledCount / requiredIds.length) * 100) : 100;
+      workflowBadge.textContent = getActiveWorkflowConfig().label;
       progressFill.style.width = `${percent}%`;
       progressFill.style.backgroundColor = missingCount || ruleErrorCount ? "var(--primary)" : "var(--success)";
-      requiredBadge.textContent = `${filledCount}/${requiredFields.length} 已完成`;
+      requiredBadge.textContent = `${filledCount}/${requiredIds.length} 已完成`;
       requiredBadge.className = missingCount ? "badge warn" : "badge done";
       ruleBadge.textContent = ruleErrorCount ? `${ruleErrorCount} 条规则提醒` : "规则正常";
       ruleBadge.className = ruleErrorCount ? "badge warn" : "badge done";
@@ -1043,13 +1533,15 @@ SN：SN202605270018
     }
 
     function buildOrderText() {
-      return outputGroups.map(([title, rows]) => {
-        const body = rows
-          .filter(([, id]) => getValue(id))
-          .map(([label, id]) => `${label}：${getValue(id)}`)
+      const config = getActiveWorkflowConfig();
+      const sections = config.outputGroups.map(([title, ids]) => {
+        const body = ids
+          .filter((id) => getValue(id))
+          .map((id) => `${fieldLabels[id] || fields[id].dataset.label || id}：${getValue(id)}`)
           .join("\n");
         return body ? `【${title}】\n${body}` : "";
-      }).filter(Boolean).join("\n\n");
+      }).filter(Boolean);
+      return [`Workflow：${config.label}`, ...sections].join("\n\n");
     }
 
     function updateOutput() {
@@ -1061,6 +1553,31 @@ SN：SN202605270018
       toast.textContent = message;
       toast.classList.add("show");
       toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function renderReleaseInfo() {
+      headerVersion.textContent = appRelease.version;
+      footerVersion.textContent = appRelease.version;
+      lastUpdated.textContent = appRelease.lastUpdated;
+      releaseVersion.textContent = appRelease.version;
+      releaseNotesList.innerHTML = "";
+      appRelease.notes.forEach((note) => {
+        const item = document.createElement("li");
+        item.textContent = note;
+        releaseNotesList.appendChild(item);
+      });
+    }
+
+    function openReleaseModal() {
+      releaseModal.hidden = false;
+      releaseModal.classList.add("show");
+      document.getElementById("closeReleaseBtn").focus();
+    }
+
+    function closeReleaseModal() {
+      releaseModal.classList.remove("show");
+      releaseModal.hidden = true;
+      document.getElementById("whatsNewBtn").focus();
     }
 
     function firstMatch(text, patterns) {
@@ -1083,6 +1600,25 @@ SN：SN202605270018
       if (/保内|质保内|保修期内|under warranty|in warranty/i.test(text)) return "保内";
       if (/保外|过保|超保|out of warranty|expired/i.test(text)) return "保外";
       return "";
+    }
+
+    function detectWorkflow(text) {
+      if (/spare\s*part|parts?|配件|备件|零件|补配件/i.test(text)) return "spareParts";
+      if (/replacement\s*shipment|replacement|换机|更换新机|补发新机|重发新机/i.test(text)) return "replacementShipment";
+      if (/exchange|return|退货|退回|退件|换货|退换/i.test(text)) return "returnExchange";
+      if (/repair|维修|寄修|检修|故障维修/i.test(text)) return "repair";
+      return "";
+    }
+
+    function renderWorkflowRecommendation(workflow) {
+      recommendedWorkflow = workflow;
+      if (!workflow || !workflowConfigs[workflow]) {
+        workflowRecommendation.classList.remove("show");
+        workflowRecommendationText.textContent = "";
+        return;
+      }
+      workflowRecommendationText.textContent = workflowConfigs[workflow].label;
+      workflowRecommendation.classList.add("show");
     }
 
     function extractInfoFromText() {
@@ -1134,6 +1670,7 @@ SN：SN202605270018
         filled.push("反馈内容");
       }
 
+      renderWorkflowRecommendation(detectWorkflow(text));
       normalizePhone();
       renderExtractNotices(filled);
       validateForm();
@@ -1161,6 +1698,9 @@ SN：SN202605270018
       if (!draft) return false;
       try {
         const parsed = JSON.parse(draft);
+        if (parsed.fields && workflowConfigs[parsed.fields.activeWorkflow]) {
+          activeWorkflow = parsed.fields.activeWorkflow;
+        }
         Object.entries(parsed.fields || {}).forEach(([id, value]) => setValue(id, value));
         rawInput.value = parsed.rawInput || "";
         return true;
@@ -1171,9 +1711,12 @@ SN：SN202605270018
     }
 
     function loadMockData() {
+      activeWorkflow = "replacementShipment";
       Object.keys(mockData).forEach((id) => setValue(id, mockData[id]));
       rawInput.value = mockRawText;
       extractNotices.innerHTML = "";
+      renderWorkflowRecommendation(detectWorkflow(mockRawText));
+      syncWorkflowView();
       validateForm();
       showToast("已载入示例数据。");
     }
@@ -1185,6 +1728,7 @@ SN：SN202605270018
       });
       rawInput.value = "";
       extractNotices.innerHTML = "";
+      renderWorkflowRecommendation("");
       localStorage.removeItem(storageKey);
       validateForm();
       showToast("表单已清空。");
@@ -1227,6 +1771,12 @@ SN：SN202605270018
       field.addEventListener("change", validateForm);
     });
 
+    workflowTabs.forEach((tab) => {
+      tab.addEventListener("click", () => setWorkflow(tab.dataset.workflow));
+    });
+    applyWorkflowRecommendationBtn.addEventListener("click", () => {
+      if (recommendedWorkflow) setWorkflow(recommendedWorkflow);
+    });
     rawInput.addEventListener("input", saveDraft);
     fields.phone.addEventListener("blur", validateForm);
     document.getElementById("extractBtn").addEventListener("click", extractInfoFromText);
@@ -1239,14 +1789,26 @@ SN：SN202605270018
     document.getElementById("apiBtn").addEventListener("click", createOrderByAPI);
     document.getElementById("loadMockBtn").addEventListener("click", loadMockData);
     document.getElementById("clearBtn").addEventListener("click", clearForm);
+    document.getElementById("whatsNewBtn").addEventListener("click", openReleaseModal);
+    document.getElementById("closeReleaseBtn").addEventListener("click", closeReleaseModal);
+    releaseModal.addEventListener("click", (event) => {
+      if (event.target === releaseModal) closeReleaseModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !releaseModal.hidden) closeReleaseModal();
+    });
     document.getElementById("clearRawBtn").addEventListener("click", () => {
       rawInput.value = "";
       extractNotices.innerHTML = "";
+      renderWorkflowRecommendation("");
       saveDraft();
       showToast("原始内容已清空。");
     });
 
+    renderReleaseInfo();
+    initializeWorkflowFields();
     if (!restoreDraft()) loadMockData();
+    syncWorkflowView();
     validateForm();
   </script>
 </body>
