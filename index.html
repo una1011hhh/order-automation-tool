@@ -63,11 +63,12 @@
     }
 
     .topbar {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 14px 18px;
       align-items: center;
-      padding: 28px 30px;
+      padding: 18px 20px;
       margin-bottom: 16px;
       color: var(--text);
       background: rgba(251, 247, 242, 0.9);
@@ -80,19 +81,19 @@
       display: flex;
       align-items: center;
       gap: 9px;
-      max-width: none;
-      margin: 0 0 10px;
-      font-size: clamp(40px, 4.2vw, 58px);
-      font-weight: 680;
-      line-height: 1;
+      max-width: 760px;
+      margin: 0 0 6px;
+      font-size: clamp(24px, 2.6vw, 34px);
+      font-weight: 720;
+      line-height: 1.12;
       letter-spacing: 0;
-      white-space: nowrap;
+      white-space: normal;
     }
 
     h1::before {
       content: "";
-      width: 18px;
-      height: 18px;
+      width: 12px;
+      height: 12px;
       border-radius: 4px;
       background: var(--primary);
       box-shadow: none;
@@ -102,38 +103,43 @@
     .topbar p {
       margin: 0;
       color: var(--muted);
-      max-width: 560px;
-      font-size: 14px;
-      line-height: 1.6;
+      max-width: 680px;
+      font-size: 13px;
+      line-height: 1.45;
     }
 
-    /* Version information */
     .header-tools {
       display: flex;
-      align-items: stretch;
-      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
     }
 
-    .version-card {
-      display: grid;
-      gap: 4px;
-      min-width: 170px;
-      padding: 12px;
-      color: var(--muted);
+    .language-select {
+      width: auto;
+      min-width: 96px;
+      height: 34px;
+      padding: 6px 28px 6px 10px;
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 5px 9px;
+      color: var(--primary);
       background: #fff;
       border: 1px solid var(--line);
-      border-radius: var(--radius);
-      font-size: 11px;
-      line-height: 1.25;
-    }
-
-    .version-card strong {
-      color: var(--text);
+      border-radius: 999px;
       font-size: 12px;
-    }
-
-    .version-card span {
-      display: block;
+      font-weight: 850;
+      white-space: nowrap;
     }
 
     .topbar-actions,
@@ -248,6 +254,55 @@
       background: #fff;
     }
 
+    .top-alert-panel {
+      display: none;
+      margin: 0 0 16px;
+      padding: 14px 16px;
+      background: #fff8ed;
+      border: 1px solid #efc88e;
+      border-left: 5px solid var(--warning);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .top-alert-panel.show {
+      display: block;
+    }
+
+    .top-alert-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin: 0 0 8px;
+      color: var(--warning);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .top-alert-list {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .top-alert-list li {
+      color: #5f3c13;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .top-alert-list button {
+      width: 100%;
+      min-height: 30px;
+      padding: 6px 8px;
+      text-align: left;
+      color: #5f3c13;
+      background: #fffdf9;
+    }
+
     /* Workflow navigation */
     .workflow-tabs {
       display: grid;
@@ -262,19 +317,32 @@
     }
 
     .workflow-tab {
+      position: relative;
       display: grid;
       gap: 4px;
       min-height: 56px;
-      padding: 10px 14px;
+      padding: 10px 14px 10px 34px;
       color: #42434d;
       text-align: left;
       background: rgba(255, 255, 255, 0.78);
       border: 1px solid var(--line);
-      border-radius: 999px;
+      border-radius: var(--radius);
       cursor: pointer;
       font-size: 13px;
       line-height: 1.25;
-      transition: background-color 0.14s ease, color 0.14s ease;
+      transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+    }
+
+    .workflow-tab::before {
+      content: "";
+      position: absolute;
+      left: 13px;
+      top: 16px;
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--line-strong);
+      border-radius: 999px;
+      background: #fff;
     }
 
     .workflow-tab:hover {
@@ -289,14 +357,19 @@
     }
 
     .workflow-tab.active {
-      color: #fff;
-      background: var(--primary);
+      color: var(--primary);
+      background: #fff;
       border-color: var(--primary);
-      box-shadow: 0 10px 22px rgba(18, 16, 22, 0.14);
+      box-shadow: inset 0 0 0 1px var(--primary), 0 10px 22px rgba(18, 16, 22, 0.1);
+    }
+
+    .workflow-tab.active::before {
+      border-color: var(--primary);
+      background: radial-gradient(circle at center, var(--primary) 0 42%, #fff 45%);
     }
 
     .workflow-tab.active span {
-      color: rgba(255, 255, 255, 0.68);
+      color: var(--muted);
     }
 
     .status-copy {
@@ -439,16 +512,304 @@
       display: block;
     }
 
+    .map-validator {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .map-validator summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      color: var(--primary);
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      list-style: none;
+    }
+
+    .map-validator summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .map-validator summary::after {
+      content: "Expand";
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .map-validator[open] summary::after {
+      content: "Collapse";
+    }
+
+    .map-validator-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .map-validator-title {
+      margin: 0;
+      color: #42434d;
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .map-validator-link {
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 750;
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+    }
+
+    .map-validator-link.is-disabled {
+      pointer-events: none;
+      color: var(--muted);
+      border-bottom-color: transparent;
+    }
+
+    .map-query {
+      min-height: 32px;
+      padding: 8px 10px;
+      color: var(--muted);
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .map-frame-wrap {
+      position: relative;
+      overflow: hidden;
+      min-height: 260px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fffdf9;
+    }
+
+    .map-frame-wrap iframe {
+      display: block;
+      width: 100%;
+      height: 260px;
+      border: 0;
+    }
+
+    .map-empty {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.5;
+      background: #fffdf9;
+    }
+
+    .map-frame-wrap.has-map .map-empty {
+      display: none;
+    }
+
     .ai-textarea {
       min-height: 220px;
     }
 
-    .output-textarea {
-      min-height: 250px;
+    .submission-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .submission-block {
+      display: grid;
+      gap: 8px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .submission-block:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .submission-title {
+      margin: 0;
+      color: #42434d;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .submission-status {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 10px;
+      color: var(--success);
+      background: var(--success-bg);
+      border: 1px solid #a7dfc4;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .submission-status.warn {
+      color: var(--warning);
+      background: var(--warning-bg);
+      border-color: #f0c47f;
+    }
+
+    .submission-warning-list {
+      display: none;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .submission-warning-list.show {
+      display: grid;
+    }
+
+    .submission-warning-list li {
+      padding: 7px 9px;
+      color: var(--warning);
+      background: #fff8ed;
+      border: 1px solid #f0c47f;
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .standardized-preview {
+      display: grid;
+      gap: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
       background: #fffdf9;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      font-size: 13px;
-      white-space: pre;
+    }
+
+    .preview-row {
+      display: grid;
+      grid-template-columns: 132px minmax(0, 1fr);
+      gap: 10px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .preview-row:last-child {
+      border-bottom: 0;
+    }
+
+    .preview-key {
+      color: var(--muted);
+      font-weight: 760;
+    }
+
+    .preview-value {
+      min-width: 0;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .submission-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .duplicate-risk-panel {
+      display: none;
+      gap: 10px;
+      padding: 10px;
+      background: #fff8ed;
+      border: 1px solid #f0c47f;
+      border-left: 4px solid var(--warning);
+      border-radius: var(--radius);
+    }
+
+    .duplicate-risk-panel.show {
+      display: grid;
+    }
+
+    .duplicate-risk-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin: 0;
+      color: var(--warning);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--warning);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .risk-badge.High {
+      background: var(--danger);
+    }
+
+    .risk-badge.Medium {
+      background: var(--warning);
+    }
+
+    .risk-badge.Low {
+      color: var(--primary);
+      background: #efe7df;
+    }
+
+    .duplicate-match-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .duplicate-match-list li {
+      display: grid;
+      gap: 4px;
+      padding: 8px;
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .duplicate-match-list strong {
+      font-size: 12px;
+    }
+
+    .duplicate-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
     }
 
     button {
@@ -502,9 +863,15 @@
       border: 1px solid var(--line);
     }
 
-    .btn-outline:hover,
-    .btn-version:hover {
+    .btn-outline:hover {
       background: #fff7ef;
+    }
+
+    .header-tools button {
+      min-height: 34px;
+      padding: 6px 10px;
+      font-size: 12px;
+      white-space: nowrap;
     }
 
     button:focus-visible,
@@ -513,17 +880,6 @@
     textarea:focus-visible {
       outline: 2px solid rgba(239, 136, 157, 0.38);
       outline-offset: 2px;
-    }
-
-    .btn-version {
-      width: 100%;
-      min-height: 30px;
-      margin-top: 6px;
-      padding: 6px 8px;
-      color: var(--primary);
-      background: #fff;
-      border: 1px solid var(--line);
-      font-size: 11px;
     }
 
     .notice-list,
@@ -738,12 +1094,13 @@
       }
 
       .topbar {
-        padding: 20px;
+        align-items: flex-start;
+        padding: 16px;
       }
 
       h1 {
-        font-size: clamp(30px, 9vw, 40px);
-        line-height: 1.05;
+        font-size: clamp(22px, 7vw, 30px);
+        line-height: 1.12;
         white-space: normal;
       }
 
@@ -752,7 +1109,6 @@
         height: 14px;
       }
 
-      .topbar,
       .status-panel {
         grid-template-columns: 1fr;
       }
@@ -762,8 +1118,8 @@
       }
 
       .header-tools {
-        display: grid;
-        grid-template-columns: 1fr;
+        width: 100%;
+        justify-content: flex-start;
       }
 
       .main-grid,
@@ -781,9 +1137,6 @@
         flex: 1 1 130px;
       }
 
-      .version-card {
-        min-width: 0;
-      }
     }
   </style>
 </head>
@@ -791,20 +1144,18 @@
   <div class="app-shell">
     <header class="topbar">
       <div>
-        <h1>Mammotion建单助手</h1>
-        <p>把客户原文整理成可复制的建单信息，并在提交前检查缺项和业务规则。</p>
+        <h1 data-i18n="appTitle">Mammotion建单助手</h1>
+        <p data-i18n="appSubtitle">把客户原文整理成可提交的标准订单，并在提交前检查缺项、业务规则和重复风险。</p>
       </div>
       <div class="header-tools">
-        <!-- Version information -->
-        <div class="version-card" aria-label="Version information">
-          <strong>Version: <span id="headerVersion"></span></strong>
-          <span>Last Updated: <span id="lastUpdated"></span></span>
-          <button type="button" class="btn-version" id="whatsNewBtn">What's New</button>
-        </div>
-        <div class="topbar-actions">
-          <button type="button" class="btn-ghost" id="loadMockBtn">载入示例</button>
-          <button type="button" class="btn-ghost" id="clearBtn">清空</button>
-        </div>
+        <select id="languageSelect" class="language-select" aria-label="Language">
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+        <span class="version-badge">V<span id="headerVersion"></span></span>
+        <button type="button" class="btn-outline" id="whatsNewBtn" data-i18n="whatsNew">更新内容</button>
+        <button type="button" class="btn-ghost" id="loadMockBtn" data-i18n="loadSample">载入示例</button>
+        <button type="button" class="btn-ghost" id="clearBtn" data-i18n="clear">清空</button>
       </div>
     </header>
 
@@ -837,17 +1188,25 @@
           <span id="ruleBadge" class="badge done">规则正常</span>
         </div>
         <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
-        <span class="hint">点击右侧缺失项可以直接跳到对应字段。</span>
+        <span class="hint" data-i18n="missingHint">点击右侧缺失项可以直接跳到对应字段。</span>
       </div>
-      <button type="button" class="btn-primary" id="validateBtn">检查表单</button>
+      <button type="button" class="btn-primary" id="validateBtn" data-i18n="checkForm">检查表单</button>
+    </section>
+
+    <section id="topAlertPanel" class="top-alert-panel" aria-live="polite">
+      <div class="top-alert-title">
+        <span data-i18n="priorityTitle">需要优先处理</span>
+        <span id="topAlertCount" class="badge warn">0 项</span>
+      </div>
+      <ul id="topAlertList" class="top-alert-list"></ul>
     </section>
 
     <div class="layout">
       <main class="main-grid">
         <section class="card">
           <div class="card-header">
-            <h2>一、客户信息</h2>
-            <span>收件与联系人</span>
+            <h2 data-i18n="customerInfo">一、客户信息</h2>
+            <span data-i18n="customerInfoSub">收件与联系人</span>
           </div>
           <div class="card-body">
             <div class="form-grid">
@@ -907,13 +1266,25 @@
                 <div class="field-error"></div>
               </div>
             </div>
+            <details class="map-validator" aria-live="polite">
+              <summary>Google Map 地址验证</summary>
+              <div class="map-validator-header">
+                <p class="map-validator-title">Google Map 地址验证</p>
+                <a id="mapOpenLink" class="map-validator-link is-disabled" href="#" target="_blank" rel="noopener">在 Google Maps 打开</a>
+              </div>
+              <div id="mapQueryText" class="map-query">提取或填写详细地址后自动定位。</div>
+              <div id="mapFrameWrap" class="map-frame-wrap">
+                <iframe id="mapFrame" title="Google Map 地址验证" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <div id="mapEmpty" class="map-empty">等待详细地址、城市、州省或国家信息。</div>
+              </div>
+            </details>
           </div>
         </section>
 
         <section class="card">
           <div class="card-header">
-            <h2>二、产品信息</h2>
-            <span>设备与订单</span>
+            <h2 data-i18n="productInfo">二、产品信息</h2>
+            <span data-i18n="productInfoSub">设备与订单</span>
           </div>
           <div class="card-body">
             <div class="form-grid">
@@ -992,8 +1363,8 @@
 
         <section class="card">
           <div class="card-header">
-            <h2>三、售后信息</h2>
-            <span>类型与原因</span>
+            <h2 data-i18n="serviceInfo">三、售后信息</h2>
+            <span data-i18n="serviceInfoSub">类型与原因</span>
           </div>
           <div class="card-body">
             <div class="form-grid">
@@ -1053,8 +1424,8 @@
 
         <section class="card">
           <div class="card-header">
-            <h2>四、发货信息</h2>
-            <span>配送与签收</span>
+            <h2 data-i18n="shippingInfo">四、发货信息</h2>
+            <span data-i18n="shippingInfoSub">配送与签收</span>
           </div>
           <div class="card-body">
             <div class="form-grid">
@@ -1085,9 +1456,18 @@
                 </select>
                 <div class="field-error"></div>
               </div>
+              <div class="field">
+                <label for="orderStatus">订单状态</label>
+                <select id="orderStatus" data-label="订单状态">
+                  <option value="Draft">Draft</option>
+                  <option value="Submitted" selected>Submitted</option>
+                  <option value="Processing">Processing</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+                <div class="field-error"></div>
+              </div>
             </div>
-            <ul id="ruleNotices" class="notice-list"></ul>
-            <p id="ruleEmpty" class="empty-state">暂无业务规则提醒。</p>
           </div>
         </section>
       </main>
@@ -1095,21 +1475,21 @@
       <aside class="side-column">
         <section class="card">
           <div class="card-header">
-            <h2>五、客户原始内容</h2>
-            <span class="badge">自动提取</span>
+            <h2 data-i18n="rawContent">五、客户原始内容</h2>
+            <span class="badge" data-i18n="autoExtract">自动提取</span>
           </div>
           <div class="card-body">
             <textarea id="rawInput" class="ai-textarea" placeholder="粘贴客户邮件、工单、聊天记录或 CRM 内容..."></textarea>
             <div class="button-row">
-              <button type="button" class="btn-primary" id="extractBtn">提取信息</button>
-              <button type="button" class="btn-secondary" id="clearRawBtn">清空原文</button>
+              <button type="button" class="btn-primary" id="extractBtn" data-i18n="extractInfo">提取信息</button>
+              <button type="button" class="btn-secondary" id="clearRawBtn" data-i18n="clearRaw">清空原文</button>
             </div>
             <div id="workflowRecommendation" class="workflow-recommendation">
               <div>
-                <strong>Suggested workflow:</strong>
+                <strong data-i18n="suggestedWorkflow">建议流程：</strong>
                 <span id="workflowRecommendationText"></span>
               </div>
-              <button type="button" class="btn-outline" id="applyWorkflowRecommendationBtn">Use Suggested Workflow</button>
+              <button type="button" class="btn-outline" id="applyWorkflowRecommendationBtn" data-i18n="useSuggestedWorkflow">使用建议流程</button>
             </div>
             <ul id="extractNotices" class="notice-list"></ul>
           </div>
@@ -1117,26 +1497,49 @@
 
         <section class="card">
           <div class="card-header">
-            <h2>六、待补充项</h2>
+            <h2 data-i18n="missingFields">六、待补充项</h2>
             <span id="missingCountLabel" class="badge warn">0 项</span>
           </div>
           <div class="card-body">
             <ul id="missingList" class="missing-list"></ul>
-            <p id="missingEmpty" class="empty-state">必填项已填写完成。</p>
+            <p id="missingEmpty" class="empty-state" data-i18n="missingEmpty">必填项已填写完成。</p>
           </div>
         </section>
 
         <section class="card">
           <div class="card-header">
-            <h2>七、结果输出</h2>
-            <span>复制到建单系统</span>
+            <h2 data-i18n="orderSubmission">订单提交</h2>
+            <span data-i18n="orderSubmissionSubtitle">校验、提交和查看</span>
           </div>
           <div class="card-body">
-            <textarea id="output" class="output-textarea" readonly></textarea>
-            <div class="button-row">
-              <button type="button" class="btn-primary" id="copyBtn">复制建单信息</button>
-              <button type="button" class="btn-outline" id="downloadBtn">下载 JSON</button>
-              <button type="button" class="btn-outline" id="apiBtn">预留 API</button>
+            <div class="submission-panel">
+              <section class="submission-block">
+                <p class="submission-title" data-i18n="validationStatus">校验状态</p>
+                <div id="submissionStatusText" class="submission-status">Checking required fields...</div>
+                <ul id="submissionWarnings" class="submission-warning-list"></ul>
+              </section>
+              <section class="submission-block">
+                <p class="submission-title" data-i18n="standardizedPreview">标准订单字段预览</p>
+                <div id="standardizedPreview" class="standardized-preview"></div>
+              </section>
+              <section id="duplicateRiskPanel" class="duplicate-risk-panel">
+                <p class="duplicate-risk-title">
+                  <span data-i18n="duplicateRiskDetected">检测到重复建单风险</span>
+                  <span id="duplicateRiskBadge" class="risk-badge">Medium</span>
+                </p>
+                <div id="duplicateRiskReason" class="hint"></div>
+                <ul id="duplicateMatchList" class="duplicate-match-list"></ul>
+                <div class="duplicate-actions">
+                  <button type="button" class="btn-outline" id="viewHistoricalOrdersBtn" data-i18n="viewHistoricalOrders">查看历史订单</button>
+                  <button type="button" class="btn-outline" id="continueSubmitBtn" data-i18n="continueSubmitAnyway">仍然继续提交</button>
+                  <button type="button" class="btn-secondary" id="cancelSubmitBtn" data-i18n="cancelSubmit">取消提交</button>
+                </div>
+              </section>
+              <div class="submission-actions">
+                <button type="button" class="btn-outline" id="copyStandardizedBtn" data-i18n="copyStandardizedFields">复制标准字段</button>
+                <button type="button" class="btn-outline" id="submitBtn" data-i18n="submitOrder">提交订单</button>
+                <button type="button" class="btn-primary" id="adminBtn" data-i18n="viewSubmittedOrders">查看已提交订单</button>
+              </div>
             </div>
           </div>
         </section>
@@ -1188,12 +1591,19 @@
       "purchaseDate", "invoiceNo", "orderNo", "issueCategory", "warrantyStatus",
       "feedback", "remarks", "orderType", "productSku", "returnSku", "reshipSku",
       "quantity", "problemDescription", "serviceReason", "feeNotified",
-      "shippingMethod", "newAddress", "signedStatus"
+      "shippingMethod", "newAddress", "signedStatus", "orderStatus"
     ];
 
     const fields = Object.fromEntries(fieldIds.map((id) => [id, document.getElementById(id)]));
     const rawInput = document.getElementById("rawInput");
-    const output = document.getElementById("output");
+    const languageSelect = document.getElementById("languageSelect");
+    const submissionStatusText = document.getElementById("submissionStatusText");
+    const submissionWarnings = document.getElementById("submissionWarnings");
+    const standardizedPreview = document.getElementById("standardizedPreview");
+    const duplicateRiskPanel = document.getElementById("duplicateRiskPanel");
+    const duplicateRiskBadge = document.getElementById("duplicateRiskBadge");
+    const duplicateRiskReason = document.getElementById("duplicateRiskReason");
+    const duplicateMatchList = document.getElementById("duplicateMatchList");
     const statusText = document.getElementById("statusText");
     const workflowBadge = document.getElementById("workflowBadge");
     const requiredBadge = document.getElementById("requiredBadge");
@@ -1202,12 +1612,17 @@
     const missingList = document.getElementById("missingList");
     const missingEmpty = document.getElementById("missingEmpty");
     const missingCountLabel = document.getElementById("missingCountLabel");
-    const ruleNotices = document.getElementById("ruleNotices");
-    const ruleEmpty = document.getElementById("ruleEmpty");
+    const topAlertPanel = document.getElementById("topAlertPanel");
+    const topAlertCount = document.getElementById("topAlertCount");
+    const topAlertList = document.getElementById("topAlertList");
     const extractNotices = document.getElementById("extractNotices");
+    const mapValidator = document.querySelector(".map-validator");
+    const mapFrame = document.getElementById("mapFrame");
+    const mapFrameWrap = document.getElementById("mapFrameWrap");
+    const mapOpenLink = document.getElementById("mapOpenLink");
+    const mapQueryText = document.getElementById("mapQueryText");
     const headerVersion = document.getElementById("headerVersion");
     const footerVersion = document.getElementById("footerVersion");
-    const lastUpdated = document.getElementById("lastUpdated");
     const releaseModal = document.getElementById("releaseModal");
     const releaseVersion = document.getElementById("releaseVersion");
     const releaseNotesList = document.getElementById("releaseNotesList");
@@ -1220,6 +1635,322 @@
     let activeWorkflow = "repair";
     let recommendedWorkflow = "";
     let toastTimer;
+    let latestValidation = { missing: [], ruleErrors: [] };
+    let currentLanguage = localStorage.getItem("order_assistant_language") || "zh";
+    let duplicateCheckTimer;
+    let duplicateRiskResult = { duplicateRisk: false, riskLevel: "", matches: [] };
+    let duplicateOverride = null;
+
+    const translations = {
+      zh: {
+        appTitle: "Mammotion建单助手",
+        appSubtitle: "把客户原文整理成可提交的标准订单，并在提交前检查缺项、业务规则和重复风险。",
+        language: "语言",
+        version: "版本",
+        lastUpdated: "最后更新",
+        whatsNew: "更新内容",
+        loadSample: "载入示例",
+        clear: "清空",
+        orderWorkflow: "订单流程",
+        repairLabel: "维修单",
+        repairSubtitle: "诊断与寄修建单",
+        returnExchangeLabel: "退换单",
+        returnExchangeSubtitle: "退回设备与换货审核",
+        sparePartsLabel: "配件发货",
+        sparePartsSubtitle: "配件申请与履约",
+        replacementShipmentLabel: "换机发货",
+        replacementShipmentSubtitle: "换机出库发货",
+        checkForm: "检查表单",
+        missingHint: "点击右侧缺失项可以直接跳到对应字段。",
+        priorityTitle: "需要优先处理",
+        customerInfo: "一、客户信息",
+        customerInfoSub: "收件与联系人",
+        productInfo: "二、产品信息",
+        productInfoSub: "设备与订单",
+        serviceInfo: "三、售后信息",
+        serviceInfoSub: "类型与原因",
+        shippingInfo: "四、发货信息",
+        shippingInfoSub: "配送与签收",
+        rawContent: "五、客户原始内容",
+        autoExtract: "自动提取",
+        rawPlaceholder: "粘贴客户邮件、工单、聊天记录或 CRM 内容...",
+        extractInfo: "提取信息",
+        clearRaw: "清空原文",
+        suggestedWorkflow: "建议流程：",
+        useSuggestedWorkflow: "使用建议流程",
+        missingFields: "六、待补充项",
+        missingEmpty: "必填项已填写完成。",
+        orderSubmission: "订单提交",
+        orderSubmissionSubtitle: "校验、提交和查看",
+        validationStatus: "校验状态",
+        standardizedPreview: "标准订单字段预览",
+        duplicateRiskDetected: "检测到重复建单风险",
+        viewHistoricalOrders: "查看历史订单",
+        continueSubmitAnyway: "仍然继续提交",
+        cancelSubmit: "取消提交",
+        copyStandardizedFields: "复制标准字段",
+        submitOrder: "提交订单",
+        viewSubmittedOrders: "查看已提交订单",
+        allReady: "所有必填项已完成，可以提交。",
+        needAttention: "项需要在提交前确认。",
+        missingRequired: "缺少必填项",
+        rulesNormal: "规则正常",
+        readyToCopy: "表单已准备好提交",
+        stillNeed: "还需要处理",
+        completed: "已完成",
+        requiredField: "必填项",
+        standardizedCopied: "标准字段已复制。",
+        standardizedCopiedWithIssues: "标准字段已复制，但仍有项目需要确认。",
+        submitFixFirst: "请先补齐必填项和规则提醒，再提交订单。",
+        duplicateReviewFirst: "检测到重复风险，请先选择继续提交或取消。",
+        submitSuccess: "订单已提交",
+        submitFailed: "提交失败，请确认已通过 npm run dev 启动本地服务。",
+        duplicateCheckFailed: "重复风险检查暂时不可用。",
+        continueReasonPrompt: "请输入继续提交原因（可选）：",
+        noDuplicateRisk: "未检测到重复建单风险。",
+        choose: "请选择",
+        yes: "是",
+        no: "否",
+        underWarranty: "保内",
+        outOfWarranty: "保外",
+        shipmentOrder: "发货单",
+        repairOrder: "维修单",
+        returnOrder: "退件单",
+        replacementOrder: "换机单",
+        customerPickup: "客户自提",
+        logisticsShipment: "物流发货",
+        signed: "已签收",
+        unsigned: "未签收",
+        duplicateReasons: {
+          "Same customer email and workflow type within 30 days": "30 天内相同客户邮箱 + 相同流程类型",
+          "Same customer address and workflow type within 30 days": "30 天内相同客户地址 + 相同流程类型",
+          "Same customer email and product SN within 30 days": "30 天内相同客户邮箱 + 相同产品 SN",
+          "Same customer address and similar issue description within 30 days": "30 天内相同客户地址 + 相似问题描述",
+          "Same email/address has historical orders with a different workflow type": "相同邮箱/地址存在不同流程类型的历史订单"
+        },
+        riskLevel: "风险等级",
+        reason: "匹配原因",
+        orderId: "订单号",
+        workflowType: "流程类型",
+        status: "状态",
+        createdDate: "创建日期",
+        customerEmail: "客户邮箱",
+        address: "地址",
+        productSn: "产品 SN",
+        High: "高风险",
+        Medium: "中风险",
+        Low: "低风险",
+        fields: {
+          contactName: "联系人姓名",
+          phone: "联系电话",
+          email: "电子邮箱",
+          customer: "客户名称",
+          country: "国家/地区",
+          state: "州/省",
+          city: "城市",
+          address: "详细地址",
+          postalCode: "邮政编码",
+          repairSite: "寄修网点",
+          supportAgent: "客服",
+          productCategory: "产品类别",
+          productModel: "产品型号",
+          productName: "产品名称",
+          machineSn: "机器 SN",
+          deviceArchive: "设备档案",
+          purchaseChannel: "购买渠道",
+          purchaseDate: "购买日期",
+          invoiceNo: "发票号",
+          orderNo: "原订单号",
+          issueCategory: "问题分类",
+          warrantyStatus: "质保状态",
+          feedback: "反馈内容",
+          remarks: "备注",
+          orderType: "建单需求",
+          productSku: "产品 SKU",
+          returnSku: "退回产品 SKU",
+          reshipSku: "补发 SKU",
+          quantity: "数量",
+          problemDescription: "故障/问题描述",
+          serviceReason: "退件/补发/发货原因",
+          feeNotified: "是否告知手续费",
+          shippingMethod: "发货方式",
+          newAddress: "是否新地址收货",
+          signedStatus: "是否已签收",
+          orderStatus: "订单状态"
+        },
+        preview: {
+          workflow: "流程类型",
+          customer: "客户名称",
+          email: "客户邮箱",
+          phone: "客户电话",
+          country: "国家/地区",
+          address: "完整地址",
+          productModel: "产品型号",
+          machineSn: "产品 SN",
+          warrantyStatus: "质保状态",
+          issueDescription: "问题描述",
+          shippingMethod: "发货方式",
+          signedStatus: "签收状态",
+          remarks: "备注"
+        }
+      },
+      en: {
+        appTitle: "Mammotion Order Creation Assistant",
+        appSubtitle: "Turn customer text into a standardized order and check required fields, business rules, and duplicate risk before submission.",
+        language: "Language",
+        version: "Version",
+        lastUpdated: "Last Updated",
+        whatsNew: "What's New",
+        loadSample: "Load Sample",
+        clear: "Clear",
+        orderWorkflow: "Order workflow",
+        repairLabel: "Repair Order",
+        repairSubtitle: "Diagnosis and repair intake",
+        returnExchangeLabel: "Return / Exchange Order",
+        returnExchangeSubtitle: "Returned unit and exchange review",
+        sparePartsLabel: "Spare Parts Request",
+        sparePartsSubtitle: "Parts request and fulfillment",
+        replacementShipmentLabel: "Replacement Shipment",
+        replacementShipmentSubtitle: "Replacement outbound shipment",
+        checkForm: "Check Form",
+        missingHint: "Click a missing item on the right to jump to the field.",
+        priorityTitle: "Needs Attention",
+        customerInfo: "1. Customer Information",
+        customerInfoSub: "Recipient and contact",
+        productInfo: "2. Product Information",
+        productInfoSub: "Device and order",
+        serviceInfo: "3. Service Information",
+        serviceInfoSub: "Type and reason",
+        shippingInfo: "4. Shipping Information",
+        shippingInfoSub: "Delivery and signature",
+        rawContent: "5. Original Customer Text",
+        autoExtract: "Auto Extract",
+        rawPlaceholder: "Paste customer email, ticket, chat transcript, or CRM content...",
+        extractInfo: "Extract Info",
+        clearRaw: "Clear Text",
+        suggestedWorkflow: "Suggested workflow:",
+        useSuggestedWorkflow: "Use Suggested Workflow",
+        missingFields: "6. Missing Fields",
+        missingEmpty: "All required fields are completed.",
+        orderSubmission: "Order Submission",
+        orderSubmissionSubtitle: "Validate, submit, and review",
+        validationStatus: "Validation Status",
+        standardizedPreview: "Standardized Order Fields Preview",
+        duplicateRiskDetected: "Duplicate Order Risk Detected",
+        viewHistoricalOrders: "View Historical Orders",
+        continueSubmitAnyway: "Continue Submit Anyway",
+        cancelSubmit: "Cancel Submit",
+        copyStandardizedFields: "Copy Standardized Fields",
+        submitOrder: "Submit Order",
+        viewSubmittedOrders: "View Submitted Orders",
+        allReady: "All required fields are completed. Ready to submit.",
+        needAttention: "items need attention before submission.",
+        missingRequired: "Missing required field",
+        rulesNormal: "Rules normal",
+        readyToCopy: "Form is ready to submit",
+        stillNeed: "Still need to handle",
+        completed: "completed",
+        requiredField: "Required field",
+        standardizedCopied: "Standardized fields copied.",
+        standardizedCopiedWithIssues: "Standardized fields copied, but some items still need attention.",
+        submitFixFirst: "Please complete required fields and warnings before submitting.",
+        duplicateReviewFirst: "Duplicate risk detected. Choose continue or cancel first.",
+        submitSuccess: "Order submitted",
+        submitFailed: "Submit failed. Please confirm the local service is running with npm run dev.",
+        duplicateCheckFailed: "Duplicate risk check is temporarily unavailable.",
+        continueReasonPrompt: "Enter reason for continuing submission (optional):",
+        noDuplicateRisk: "No duplicate order risk detected.",
+        choose: "Select",
+        yes: "Yes",
+        no: "No",
+        underWarranty: "Under Warranty",
+        outOfWarranty: "Out of Warranty",
+        shipmentOrder: "Shipment Order",
+        repairOrder: "Repair Order",
+        returnOrder: "Return Order",
+        replacementOrder: "Replacement Order",
+        customerPickup: "Customer Pickup",
+        logisticsShipment: "Logistics Shipment",
+        signed: "Signed",
+        unsigned: "Unsigned",
+        duplicateReasons: {
+          "Same customer email and workflow type within 30 days": "Same customer email and workflow type within 30 days",
+          "Same customer address and workflow type within 30 days": "Same customer address and workflow type within 30 days",
+          "Same customer email and product SN within 30 days": "Same customer email and product SN within 30 days",
+          "Same customer address and similar issue description within 30 days": "Same customer address and similar issue description within 30 days",
+          "Same email/address has historical orders with a different workflow type": "Same email/address has historical orders with a different workflow type"
+        },
+        riskLevel: "Risk level",
+        reason: "Reason",
+        orderId: "Order ID",
+        workflowType: "Workflow type",
+        status: "Status",
+        createdDate: "Created date",
+        customerEmail: "Customer email",
+        address: "Address",
+        productSn: "Product SN",
+        High: "High",
+        Medium: "Medium",
+        Low: "Low",
+        fields: {
+          contactName: "Contact Name",
+          phone: "Phone",
+          email: "Email",
+          customer: "Customer Name",
+          country: "Country / Region",
+          state: "State / Province",
+          city: "City",
+          address: "Detailed Address",
+          postalCode: "Postal Code",
+          repairSite: "Repair Site",
+          supportAgent: "Support Agent",
+          productCategory: "Product Category",
+          productModel: "Product Model",
+          productName: "Product Name",
+          machineSn: "Machine SN",
+          deviceArchive: "Device Archive",
+          purchaseChannel: "Purchase Channel",
+          purchaseDate: "Purchase Date",
+          invoiceNo: "Invoice No.",
+          orderNo: "Original Order No.",
+          issueCategory: "Issue Category",
+          warrantyStatus: "Warranty Status",
+          feedback: "Feedback",
+          remarks: "Notes",
+          orderType: "Order Type",
+          productSku: "Product SKU",
+          returnSku: "Return Product SKU",
+          reshipSku: "Reship SKU",
+          quantity: "Quantity",
+          problemDescription: "Issue Description",
+          serviceReason: "Return / Reship / Shipping Reason",
+          feeNotified: "Fee Notified",
+          shippingMethod: "Shipping Method",
+          newAddress: "New Shipping Address",
+          signedStatus: "Signature Status",
+          orderStatus: "Order Status"
+        },
+        preview: {
+          workflow: "Workflow Type",
+          customer: "Customer Name",
+          email: "Customer Email",
+          phone: "Customer Phone",
+          country: "Country / Region",
+          address: "Full Address",
+          productModel: "Product Model",
+          machineSn: "Product SN",
+          warrantyStatus: "Warranty Status",
+          issueDescription: "Issue Description",
+          shippingMethod: "Shipping Method",
+          signedStatus: "Signature Status",
+          remarks: "Notes"
+        }
+      }
+    };
+
+    function t(key) {
+      return key.split(".").reduce((value, part) => value && value[part], translations[currentLanguage]) || key;
+    }
 
     const mockData = {
       contactName: "李明",
@@ -1256,7 +1987,8 @@
       feeNotified: "是",
       shippingMethod: "物流发货",
       newAddress: "否",
-      signedStatus: "未签收"
+      signedStatus: "未签收",
+      orderStatus: "Submitted"
     };
 
     const mockRawText = `客户邮件内容：
@@ -1283,7 +2015,7 @@ SN：SN202605270018
 
     const commonCustomerFields = [
       "contactName", "phone", "email", "customer", "country", "state", "city",
-      "address", "postalCode", "supportAgent"
+      "address", "postalCode", "supportAgent", "orderStatus"
     ];
 
     const commonCustomerRequired = [
@@ -1412,17 +2144,129 @@ SN：SN202605270018
       feeNotified: "是否告知手续费",
       shippingMethod: "发货方式",
       newAddress: "是否新地址收货",
-      signedStatus: "是否已签收"
+      signedStatus: "是否已签收",
+      orderStatus: "订单状态"
     };
 
     function getValue(id) {
       return fields[id] ? fields[id].value.trim() : "";
     }
 
+    function setFieldLabelText(id, text) {
+      const field = fields[id];
+      if (!field) return;
+      field.dataset.label = text;
+      const label = field.parentElement.querySelector("label");
+      if (!label) return;
+      const existingMark = label.querySelector(".required-mark");
+      const markVisible = existingMark && existingMark.style.display !== "none";
+      label.textContent = text;
+      if (existingMark) {
+        const mark = document.createElement("span");
+        mark.className = "required-mark";
+        mark.textContent = "*";
+        mark.style.display = markVisible ? "" : "none";
+        label.appendChild(mark);
+      }
+    }
+
+    function applyLanguage() {
+      languageSelect.value = currentLanguage;
+      document.documentElement.lang = currentLanguage === "zh" ? "zh-CN" : "en";
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
+        element.textContent = t(element.dataset.i18n);
+      });
+      rawInput.placeholder = t("rawPlaceholder");
+      Object.entries(t("fields")).forEach(([id, label]) => setFieldLabelText(id, label));
+      applySelectOptionLabels();
+
+      workflowConfigs.repair.label = t("repairLabel");
+      workflowConfigs.repair.subtitle = t("repairSubtitle");
+      workflowConfigs.returnExchange.label = t("returnExchangeLabel");
+      workflowConfigs.returnExchange.subtitle = t("returnExchangeSubtitle");
+      workflowConfigs.spareParts.label = t("sparePartsLabel");
+      workflowConfigs.spareParts.subtitle = t("sparePartsSubtitle");
+      workflowConfigs.replacementShipment.label = t("replacementShipmentLabel");
+      workflowConfigs.replacementShipment.subtitle = t("replacementShipmentSubtitle");
+
+      workflowTabs.forEach((tab) => {
+        const config = workflowConfigs[tab.dataset.workflow];
+        if (!config) return;
+        const subtitle = tab.querySelector("span");
+        tab.childNodes[0].textContent = config.label;
+        if (subtitle) subtitle.textContent = config.subtitle;
+      });
+
+      syncRequiredMarks(getRequiredFieldIds());
+      renderWorkflowRecommendation(recommendedWorkflow);
+      updateStatus(latestValidation.missing.length, latestValidation.ruleErrors.length);
+      renderMissing(latestValidation.missing);
+      renderTopAlerts(latestValidation.missing, latestValidation.ruleErrors);
+      updateOutput();
+      renderDuplicateRisk();
+    }
+
+    function setOptionText(selectId, value, label) {
+      const select = fields[selectId];
+      if (!select) return;
+      const option = Array.from(select.options).find((item) => item.value === value);
+      if (option) option.textContent = label;
+    }
+
+    function applySelectOptionLabels() {
+      ["warrantyStatus", "orderType", "feeNotified", "shippingMethod", "newAddress", "signedStatus"].forEach((id) => {
+        setOptionText(id, "", t("choose"));
+      });
+      setOptionText("warrantyStatus", "保内", t("underWarranty"));
+      setOptionText("warrantyStatus", "保外", t("outOfWarranty"));
+      setOptionText("orderType", "发货单", t("shipmentOrder"));
+      setOptionText("orderType", "维修单", t("repairOrder"));
+      setOptionText("orderType", "退件单", t("returnOrder"));
+      setOptionText("orderType", "换机单", t("replacementOrder"));
+      setOptionText("feeNotified", "是", t("yes"));
+      setOptionText("feeNotified", "否", t("no"));
+      setOptionText("shippingMethod", "客户自提", t("customerPickup"));
+      setOptionText("shippingMethod", "物流发货", t("logisticsShipment"));
+      setOptionText("newAddress", "是", t("yes"));
+      setOptionText("newAddress", "否", t("no"));
+      setOptionText("signedStatus", "已签收", t("signed"));
+      setOptionText("signedStatus", "未签收", t("unsigned"));
+    }
+
     function setValue(id, value) {
       if (!fields[id] || value === undefined || value === null || value === "") return false;
       fields[id].value = String(value).trim();
       return true;
+    }
+
+    function buildMapQuery() {
+      return ["address", "city", "state", "country"]
+        .map((id) => getValue(id))
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    function updateMapValidator() {
+      const query = buildMapQuery();
+      if (!query) {
+        mapFrame.removeAttribute("src");
+        mapFrameWrap.classList.remove("has-map");
+        mapOpenLink.href = "#";
+        mapOpenLink.classList.add("is-disabled");
+        mapQueryText.textContent = "提取或填写详细地址后自动定位。";
+        return;
+      }
+
+      const encodedQuery = encodeURIComponent(query);
+      if (mapValidator.open) {
+        mapFrame.src = `https://www.google.com/maps?q=${encodedQuery}&output=embed`;
+      } else {
+        mapFrame.removeAttribute("src");
+      }
+      mapOpenLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
+      mapOpenLink.classList.remove("is-disabled");
+      mapFrameWrap.classList.add("has-map");
+      mapQueryText.textContent = `当前定位：${query}`;
     }
 
     function normalizePhone() {
@@ -1520,12 +2364,13 @@ SN：SN202605270018
       syncWorkflowView();
       validateForm();
       if (!options.silent) {
-        showToast(`已切换到 ${workflowConfigs[workflow].label}。`);
+        showToast(currentLanguage === "zh" ? `已切换到 ${workflowConfigs[workflow].label}。` : `Switched to ${workflowConfigs[workflow].label}.`);
       }
     }
 
     function validateForm() {
       normalizePhone();
+      updateMapValidator();
       Object.values(fields).forEach(clearFieldError);
       const missing = [];
       const ruleErrors = [];
@@ -1534,9 +2379,9 @@ SN：SN202605270018
       requiredIds.forEach((id) => {
         const field = fields[id];
         if (field && !field.value.trim()) {
-          const label = field.dataset.label || "必填项";
+          const label = field.dataset.label || t("requiredField");
           missing.push({ id: field.id, label });
-          setFieldError(field, `${label}为必填项`);
+          setFieldError(field, `${t("missingRequired")}：${label}`);
         }
       });
 
@@ -1578,8 +2423,9 @@ SN：SN202605270018
       }
 
       renderMissing(missing);
-      renderRuleNotices(ruleErrors);
+      renderTopAlerts(missing, ruleErrors);
       updateStatus(missing.length, ruleErrors.length);
+      latestValidation = { missing, ruleErrors };
       updateOutput();
       saveDraft();
 
@@ -1605,13 +2451,13 @@ SN：SN202605270018
       workflowBadge.textContent = getActiveWorkflowConfig().label;
       progressFill.style.width = `${percent}%`;
       progressFill.style.backgroundColor = missingCount || ruleErrorCount ? "var(--primary)" : "var(--success)";
-      requiredBadge.textContent = `${filledCount}/${requiredIds.length} 已完成`;
+      requiredBadge.textContent = `${filledCount}/${requiredIds.length} ${t("completed")}`;
       requiredBadge.className = missingCount ? "badge warn" : "badge done";
-      ruleBadge.textContent = ruleErrorCount ? `${ruleErrorCount} 条规则提醒` : "规则正常";
+      ruleBadge.textContent = ruleErrorCount ? `${ruleErrorCount} ${currentLanguage === "zh" ? "条规则提醒" : "rule warning(s)"}` : t("rulesNormal");
       ruleBadge.className = ruleErrorCount ? "badge warn" : "badge done";
       statusText.textContent = missingCount || ruleErrorCount
-        ? `还需要处理 ${missingCount + ruleErrorCount} 项`
-        : "表单已准备好复制";
+        ? `${t("stillNeed")} ${missingCount + ruleErrorCount} ${currentLanguage === "zh" ? "项" : "item(s)"}`
+        : t("readyToCopy");
     }
 
     function renderMissing(items) {
@@ -1633,31 +2479,189 @@ SN：SN202605270018
       });
     }
 
-    function renderRuleNotices(messages) {
-      ruleNotices.innerHTML = "";
-      ruleEmpty.style.display = messages.length ? "none" : "block";
-      messages.forEach((message) => {
+    function renderTopAlerts(missingItems, ruleMessages) {
+      const alerts = [
+        ...missingItems.map((item) => ({
+          text: `${t("missingRequired")}：${item.label}`,
+          targetId: item.id
+        })),
+        ...ruleMessages.map((message) => ({ text: message }))
+      ];
+      topAlertList.innerHTML = "";
+      topAlertPanel.classList.toggle("show", alerts.length > 0);
+      topAlertCount.textContent = `${alerts.length} ${currentLanguage === "zh" ? "项" : "item(s)"}`;
+      alerts.forEach((alert) => {
         const item = document.createElement("li");
-        item.className = "error";
-        item.textContent = message;
-        ruleNotices.appendChild(item);
+        if (alert.targetId && fields[alert.targetId]) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "btn-outline";
+          button.textContent = alert.text;
+          button.addEventListener("click", () => {
+            fields[alert.targetId].scrollIntoView({ behavior: "smooth", block: "center" });
+            fields[alert.targetId].focus();
+          });
+          item.appendChild(button);
+        } else {
+          item.textContent = alert.text;
+        }
+        topAlertList.appendChild(item);
       });
+    }
+
+    function formatFieldLines(ids) {
+      return ids
+        .filter((id) => getValue(id))
+        .map((id) => `${fieldLabels[id] || fields[id].dataset.label || id}：${getValue(id)}`)
+        .join("\n");
     }
 
     function buildOrderText() {
       const config = getActiveWorkflowConfig();
       const sections = config.outputGroups.map(([title, ids]) => {
-        const body = ids
-          .filter((id) => getValue(id))
-          .map((id) => `${fieldLabels[id] || fields[id].dataset.label || id}：${getValue(id)}`)
-          .join("\n");
+        const body = formatFieldLines(ids);
         return body ? `【${title}】\n${body}` : "";
       }).filter(Boolean);
       return [`Workflow：${config.label}`, ...sections].join("\n\n");
     }
 
+    function getIssueDescription() {
+      return getValue("problemDescription") || getValue("feedback") || getValue("serviceReason");
+    }
+
+    function getStandardizedOrderFields() {
+      return [
+        [t("preview.workflow"), getActiveWorkflowConfig().label],
+        [t("preview.customer"), getValue("customer")],
+        [t("preview.email"), getValue("email")],
+        [t("preview.phone"), getValue("phone")],
+        [t("preview.country"), getValue("country")],
+        [t("preview.address"), buildMapQuery()],
+        [t("preview.productModel"), getValue("productModel")],
+        [t("preview.machineSn"), getValue("machineSn")],
+        [t("preview.warrantyStatus"), getValue("warrantyStatus")],
+        [t("preview.issueDescription"), getIssueDescription()],
+        [t("preview.shippingMethod"), getValue("shippingMethod")],
+        [t("preview.signedStatus"), getValue("signedStatus")],
+        [t("preview.remarks"), getValue("remarks")]
+      ];
+    }
+
+    function buildStandardizedFieldsText() {
+      return getStandardizedOrderFields()
+        .map(([label, value]) => `${label}: ${value || "-"}`)
+        .join("\n");
+    }
+
     function updateOutput() {
-      output.value = buildOrderText();
+      const warnings = [
+        ...latestValidation.missing.map((item) => `Missing required field: ${item.label}`),
+        ...latestValidation.ruleErrors
+      ];
+      const ready = warnings.length === 0;
+      submissionStatusText.textContent = ready
+        ? t("allReady")
+        : `${warnings.length} ${t("needAttention")}`;
+      submissionStatusText.classList.toggle("warn", !ready);
+
+      submissionWarnings.innerHTML = "";
+      submissionWarnings.classList.toggle("show", warnings.length > 0);
+      warnings.forEach((warning) => {
+        const item = document.createElement("li");
+        item.textContent = warning;
+        submissionWarnings.appendChild(item);
+      });
+
+      standardizedPreview.innerHTML = "";
+      getStandardizedOrderFields().forEach(([label, value]) => {
+        const row = document.createElement("div");
+        row.className = "preview-row";
+        const key = document.createElement("div");
+        key.className = "preview-key";
+        key.textContent = label;
+        const fieldValue = document.createElement("div");
+        fieldValue.className = "preview-value";
+        fieldValue.textContent = value || "-";
+        row.append(key, fieldValue);
+        standardizedPreview.appendChild(row);
+      });
+    }
+
+    function buildDuplicateCheckParams() {
+      const params = new URLSearchParams();
+      params.set("email", getValue("email"));
+      params.set("address", getValue("address"));
+      params.set("workflow", activeWorkflow);
+      params.set("machineSn", getValue("machineSn"));
+      params.set("issueDescription", getIssueDescription());
+      return params;
+    }
+
+    function getDuplicateAdminUrl() {
+      const params = new URLSearchParams();
+      if (getValue("email")) params.set("email", getValue("email"));
+      if (activeWorkflow) params.set("workflow", activeWorkflow);
+      return `/admin/orders${params.toString() ? `?${params}` : ""}`;
+    }
+
+    function renderDuplicateRisk() {
+      const hasRisk = duplicateRiskResult.duplicateRisk && duplicateRiskResult.matches.length > 0;
+      duplicateRiskPanel.classList.toggle("show", hasRisk);
+      if (!hasRisk) return;
+
+      duplicateRiskBadge.textContent = `${t(duplicateRiskResult.riskLevel)} ${currentLanguage === "zh" ? "重复风险" : "Risk Duplicate"}`;
+      duplicateRiskBadge.className = `risk-badge ${duplicateRiskResult.riskLevel}`;
+      duplicateRiskReason.textContent = duplicateRiskResult.matches
+        .flatMap((match) => match.reasons || [])
+        .filter((reason, index, list) => list.indexOf(reason) === index)
+        .map((reason) => t(`duplicateReasons.${reason}`))
+        .join("；");
+      duplicateMatchList.innerHTML = "";
+      duplicateRiskResult.matches.forEach((match) => {
+        const item = document.createElement("li");
+        const title = document.createElement("strong");
+        title.textContent = `${t("orderId")}: ${match.id}`;
+        const details = document.createElement("span");
+        details.textContent = [
+          `${t("workflowType")}: ${match.workflowLabel || match.workflow || "-"}`,
+          `${t("status")}: ${match.status || "-"}`,
+          `${t("createdDate")}: ${match.createdAt ? new Date(match.createdAt).toLocaleString() : "-"}`,
+          `${t("customerEmail")}: ${match.customerEmail || "-"}`,
+          `${t("address")}: ${match.address || "-"}`,
+          `${t("productSn")}: ${match.productSn || "-"}`
+        ].join(" | ");
+        item.append(title, details);
+        duplicateMatchList.appendChild(item);
+      });
+    }
+
+    async function runDuplicateCheck() {
+      const hasSignal = getValue("email") || getValue("address") || getValue("machineSn");
+      if (!hasSignal) {
+        duplicateRiskResult = { duplicateRisk: false, riskLevel: "", matches: [] };
+        duplicateOverride = null;
+        renderDuplicateRisk();
+        return duplicateRiskResult;
+      }
+
+      try {
+        const response = await fetch(`/api/orders/check-duplicate?${buildDuplicateCheckParams()}`);
+        const result = await response.json();
+        duplicateRiskResult = result;
+        if (!result.duplicateRisk) duplicateOverride = null;
+        renderDuplicateRisk();
+        return result;
+      } catch (error) {
+        console.error(error);
+        showToast(t("duplicateCheckFailed"));
+        return duplicateRiskResult;
+      }
+    }
+
+    function scheduleDuplicateCheck() {
+      duplicateOverride = null;
+      clearTimeout(duplicateCheckTimer);
+      duplicateCheckTimer = setTimeout(runDuplicateCheck, 450);
     }
 
     function showToast(message) {
@@ -1670,7 +2674,6 @@ SN：SN202605270018
     function renderReleaseInfo() {
       headerVersion.textContent = appRelease.version;
       footerVersion.textContent = appRelease.version;
-      lastUpdated.textContent = appRelease.lastUpdated;
       releaseVersion.textContent = appRelease.version;
       releaseNotesList.innerHTML = "";
       appRelease.notes.forEach((note) => {
@@ -1814,6 +2817,7 @@ SN：SN202605270018
           activeWorkflow = parsed.fields.activeWorkflow;
         }
         Object.entries(parsed.fields || {}).forEach(([id, value]) => setValue(id, value));
+        if (!getValue("orderStatus")) fields.orderStatus.value = "Submitted";
         rawInput.value = parsed.rawInput || "";
         return true;
       } catch {
@@ -1841,64 +2845,141 @@ SN：SN202605270018
       rawInput.value = "";
       extractNotices.innerHTML = "";
       renderWorkflowRecommendation("");
+      fields.orderStatus.value = "Submitted";
       localStorage.removeItem(storageKey);
       validateForm();
       showToast("表单已清空。");
     }
 
-    async function copyOrderText() {
-      const result = validateForm();
-      const text = buildOrderText();
+    async function copyTextToClipboard(text, successMessage) {
       try {
         await navigator.clipboard.writeText(text);
-        showToast(result.isValid ? "建单信息已复制。" : "已复制当前信息，但还有项目需要确认。");
+        showToast(successMessage);
       } catch {
-        output.focus();
-        output.select();
+        const fallback = document.createElement("textarea");
+        fallback.value = text;
+        fallback.style.position = "fixed";
+        fallback.style.left = "-9999px";
+        document.body.appendChild(fallback);
+        fallback.focus();
+        fallback.select();
         document.execCommand("copy");
-        showToast("建单信息已复制。");
+        fallback.remove();
+        showToast(successMessage);
       }
     }
 
-    function downloadJson() {
-      const payload = collectPayload();
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `售后建单-${payload.orderNo || payload.machineSn || Date.now()}.json`;
-      link.click();
-      URL.revokeObjectURL(link.href);
-      showToast("JSON 已生成。");
+    async function copyStandardizedFields() {
+      const result = validateForm();
+      await copyTextToClipboard(
+        buildStandardizedFieldsText(),
+        result.isValid ? t("standardizedCopied") : t("standardizedCopiedWithIssues")
+      );
     }
 
-    async function createOrderByAPI() {
-      const payload = collectPayload();
-      console.log("预留 API 建单 payload：", payload);
-      showToast("API 入口已保留，当前版本会输出 payload 到控制台。");
-      return payload;
+    function buildSubmissionPayload() {
+      return {
+        activeWorkflow,
+        workflowLabel: getActiveWorkflowConfig().label,
+        status: getValue("orderStatus") || "Submitted",
+        fields: collectPayload(),
+        duplicateRisk: Boolean(duplicateOverride),
+        duplicateRiskLevel: duplicateOverride ? duplicateRiskResult.riskLevel : "",
+        matchedOrderIds: duplicateOverride ? duplicateRiskResult.matches.map((match) => match.id) : [],
+        overrideReason: duplicateOverride ? duplicateOverride.reason : "",
+        outputs: {
+          standardizedFields: buildStandardizedFieldsText()
+        }
+      };
+    }
+
+    async function submitOrder(options = {}) {
+      const result = validateForm();
+      if (!result.isValid) {
+        showToast(t("submitFixFirst"));
+        return;
+      }
+
+      const duplicateResult = await runDuplicateCheck();
+      if (duplicateResult.duplicateRisk && !options.overrideDuplicate) {
+        showToast(t("duplicateReviewFirst"));
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildSubmissionPayload())
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Submit failed");
+        fields.orderStatus.value = data.order.status || "Submitted";
+        duplicateOverride = null;
+        validateForm();
+        showToast(`${t("submitSuccess")}：${data.order.id}`);
+      } catch (error) {
+        showToast(t("submitFailed"));
+        console.error(error);
+      }
+    }
+
+    function openAdminOrders() {
+      window.location.href = "/admin/orders";
     }
 
     Object.values(fields).forEach((field) => {
-      field.addEventListener("input", validateForm);
-      field.addEventListener("change", validateForm);
+      field.addEventListener("input", () => {
+        validateForm();
+        if (["email", "address", "machineSn", "problemDescription", "feedback", "serviceReason"].includes(field.id)) {
+          scheduleDuplicateCheck();
+        }
+      });
+      field.addEventListener("change", () => {
+        validateForm();
+        if (["email", "address", "machineSn", "problemDescription", "feedback", "serviceReason"].includes(field.id)) {
+          scheduleDuplicateCheck();
+        }
+      });
     });
 
     workflowTabs.forEach((tab) => {
-      tab.addEventListener("click", () => setWorkflow(tab.dataset.workflow));
+      tab.addEventListener("click", () => {
+        setWorkflow(tab.dataset.workflow);
+        scheduleDuplicateCheck();
+      });
     });
     applyWorkflowRecommendationBtn.addEventListener("click", () => {
       if (recommendedWorkflow) setWorkflow(recommendedWorkflow);
     });
     rawInput.addEventListener("input", saveDraft);
+    mapValidator.addEventListener("toggle", updateMapValidator);
     fields.phone.addEventListener("blur", validateForm);
     document.getElementById("extractBtn").addEventListener("click", extractInfoFromText);
     document.getElementById("validateBtn").addEventListener("click", () => {
       const result = validateForm();
-      showToast(result.isValid ? "检查通过，可以复制建单信息。" : "检查未通过，请看红框和待补充项。");
+      showToast(result.isValid ? t("allReady") : t("submitFixFirst"));
     });
-    document.getElementById("copyBtn").addEventListener("click", copyOrderText);
-    document.getElementById("downloadBtn").addEventListener("click", downloadJson);
-    document.getElementById("apiBtn").addEventListener("click", createOrderByAPI);
+    document.getElementById("copyStandardizedBtn").addEventListener("click", copyStandardizedFields);
+    document.getElementById("submitBtn").addEventListener("click", () => submitOrder());
+    document.getElementById("adminBtn").addEventListener("click", openAdminOrders);
+    document.getElementById("viewHistoricalOrdersBtn").addEventListener("click", () => {
+      window.location.href = getDuplicateAdminUrl();
+    });
+    document.getElementById("continueSubmitBtn").addEventListener("click", () => {
+      duplicateOverride = { reason: window.prompt(t("continueReasonPrompt")) || "" };
+      submitOrder({ overrideDuplicate: true });
+    });
+    document.getElementById("cancelSubmitBtn").addEventListener("click", () => {
+      duplicateOverride = null;
+      duplicateRiskPanel.classList.remove("show");
+    });
+    languageSelect.addEventListener("change", () => {
+      currentLanguage = languageSelect.value;
+      localStorage.setItem("order_assistant_language", currentLanguage);
+      applyLanguage();
+      validateForm();
+    });
     document.getElementById("loadMockBtn").addEventListener("click", loadMockData);
     document.getElementById("clearBtn").addEventListener("click", clearForm);
     document.getElementById("whatsNewBtn").addEventListener("click", openReleaseModal);
@@ -1919,9 +3000,11 @@ SN：SN202605270018
 
     renderReleaseInfo();
     initializeWorkflowFields();
+    applyLanguage();
     if (!restoreDraft()) loadMockData();
     syncWorkflowView();
     validateForm();
+    runDuplicateCheck();
   </script>
 </body>
 </html>
